@@ -1,0 +1,45 @@
+# Crow Business Admin - Fast setup
+
+# 1. Create Laravel 13
+composer create-project laravel/laravel crow-business "^13.0"
+cd crow-business
+
+# 2. Install Filament 5
+composer require filament/filament:"^5.0"
+php artisan filament:install --panels
+
+# Windows PowerShell alternative:
+# composer require filament/filament:"~5.0"
+
+# 3. Copy the ZIP's app/ and database/ folders into the Laravel project.
+
+# 4. Configure DB in .env, then:
+php artisan migrate
+php artisan db:seed --class=CrowDemoSeeder
+
+# 5. Create admin:
+php artisan make:filament-user
+
+# 6. Storage:
+php artisan storage:link
+
+# 7. Build:
+npm install
+npm run build
+
+# 8. Run:
+php artisan serve
+
+# 9. Scheduler / queue during development:
+php artisan queue:work
+php artisan schedule:work
+
+# 10. Test numbering:
+php artisan tinker
+# app(\App\Services\DocumentNumberService::class)->quotation();
+# app(\App\Services\DocumentNumberService::class)->invoice();
+
+# Production:
+php artisan migrate --force
+php artisan optimize
+php artisan filament:optimize
