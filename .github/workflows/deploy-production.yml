@@ -29,12 +29,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
 
       - name: Clean and Install NPM Dependencies
         run: |
           rm -rf node_modules
-          npm ci
+          npm install
 
       - name: Build Frontend Assets
         run: npm run build
