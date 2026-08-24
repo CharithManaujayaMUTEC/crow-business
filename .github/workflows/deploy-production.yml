@@ -1,0 +1,103 @@
+name: Deploy Crow Business to Production
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, bcmath, intl, pdo_mysql
+          coverage: none
+
+      - name: Install Composer Dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Clean and Install NPM Dependencies
+        run: |
+          rm -rf node_modules
+          npm install
+
+      - name: Build Frontend Assets
+        run: npm run build
+
+      - name: Configure SSH Key
+        run: |
+          mkdir -p "$HOME/.ssh"
+
+          echo "${{ secrets.SSH_PASSWORD }}" > "$HOME/.ssh/id_rsa"
+
+          chmod 600 "$HOME/.ssh/id_rsa"
+
+          cat > "$HOME/.ssh/config" << EOF
+          Host production
+            HostName ${{ secrets.SSH_HOST }}
+            User ${{ secrets.SSH_USER }}
+            Port ${{ secrets.SSH_PORT }}
+            IdentityFile $HOME/.ssh/id_rsa
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+          EOF
+
+          chmod 600 "$HOME/.ssh/config"
+
+      - name: Synchronize Files to Production Server
+        run: |
+          rsync \
+            -e "ssh -F $HOME/.ssh/config" \
+            --recursive \
+            --delete \
+            --exclude=".env" \
+            --exclude=".git" \
+            --exclude=".github" \
+            --exclude="vendor" \
+            --exclude="node_modules" \
+            --exclude="storage/logs/*" \
+            --exclude="public_html" \
+            --exclude="public/index.php" \
+            --exclude="public/.htaccess" \
+            ./ \
+            production:${{ secrets.DEPLOY_PATH }}/
+
+      - name: Run Laravel Production Commands
+        run: |
+          ssh -F "$HOME/.ssh/config" production << EOF
+            set -e
+
+            cd "${{ secrets.DEPLOY_PATH }}"
+
+            rm -rf node_modules
+
+            /opt/alt/php84/usr/bin/php /usr/local/bin/composer2 install \
+              --no-dev \
+              --prefer-dist \
+              --optimize-autoloader \
+              --no-interaction
+
+            /opt/alt/php84/usr/bin/php artisan migrate --force
+
+            /opt/alt/php84/usr/bin/php artisan optimize:clear
+
+            /opt/alt/php84/usr/bin/php artisan config:cache
+
+            /opt/alt/php84/usr/bin/php artisan route:cache
+
+            /opt/alt/php84/usr/bin/php artisan view:cache
+          EOF
