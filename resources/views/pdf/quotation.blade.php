@@ -6,10 +6,7 @@
     if ($company?->letterhead_path) {
         $possiblePaths = [
             public_path($company->letterhead_path),
-            storage_path('app/public/' . ltrim(
-                str_replace(['storage/', '/storage/'], '', $company->letterhead_path),
-                '/'
-            )),
+            storage_path('app/public/' . ltrim(str_replace('storage/', '', $company->letterhead_path), '/')),
         ];
 
         foreach ($possiblePaths as $path) {
@@ -33,7 +30,6 @@
 <title>Quotation {{ $quotation->number }}</title>
 
 <style>
-
 @page {
     size: A4;
     margin: 0;
@@ -44,55 +40,57 @@ body {
     margin: 0;
     padding: 0;
     width: 210mm;
-    min-height: 297mm;
+    height: 297mm;
 }
 
 body {
     font-family: DejaVu Sans, Arial, sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     color: #ffffff;
+    background: #000000;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Letterhead Background
-|--------------------------------------------------------------------------
-*/
-
-.letterhead-background {
+.letterhead {
     position: fixed;
     top: 0;
     left: 0;
     width: 210mm;
     height: 297mm;
-    z-index: -1000;
+    z-index: 0;
 }
 
-.letterhead-background img {
+.letterhead img {
     width: 210mm;
     height: 297mm;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Page Content
-|--------------------------------------------------------------------------
-*/
-
 .page {
     position: relative;
-    padding: 210px 70px 145px 70px;
+    z-index: 1;
+    padding: 62mm 18mm 40mm 18mm;
+}
+
+.header-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 12px 0;
+}
+
+.header-table td {
+    border: none;
+    padding: 0;
+    vertical-align: top;
 }
 
 h1 {
-    margin: 0 0 6px;
-    font-size: 24px;
+    margin: 0 0 5px;
+    font-size: 22px;
     color: #ffffff;
 }
 
 h2 {
-    margin: 18px 0 8px;
-    font-size: 14px;
+    margin: 16px 0 7px;
+    font-size: 13px;
     color: #f5a623;
 }
 
@@ -104,160 +102,147 @@ h2 {
     text-align: right;
 }
 
-table {
+.document-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 16px;
+    margin-top: 12px;
 }
 
-th,
-td {
+.document-table th,
+.document-table td {
+    padding: 8px 6px;
     border-bottom: 1px solid #777777;
-    padding: 8px;
+}
+
+.document-table th {
+    color: #f5a623;
+    background: #151515;
     text-align: left;
 }
 
-th {
-    color: #f5a623;
-    background: #111111;
+.document-table td {
+    color: #ffffff;
 }
 
 .right-cell {
     text-align: right;
 }
 
-.total-table td {
-    border-bottom: none;
+.totals-table {
+    width: 48%;
+    margin-left: auto;
+    border-collapse: collapse;
+    margin-top: 14px;
+}
+
+.totals-table td {
+    padding: 6px;
+    border-bottom: 1px solid #555555;
 }
 
 .total {
-    font-size: 14px;
-    font-weight: bold;
     color: #f5a623;
+    font-size: 13px;
+    font-weight: bold;
 }
 
-.note-box,
-.bank-box {
-    margin-top: 18px;
-    padding: 12px;
+.box {
+    margin-top: 14px;
+    padding: 10px;
     border: 1px solid #666666;
     background: #111111;
+    color: #ffffff;
 }
 
 .bank-box {
     margin-top: 14px;
+    padding: 10px;
+    border: 1px solid #666666;
+    background: #111111;
+    color: #ffffff;
 }
 
 .small {
     font-size: 9px;
 }
-
 </style>
 </head>
 
 <body>
 
 @if($letterheadData)
-    <div class="letterhead-background">
+    <div class="letterhead">
         <img src="{{ $letterheadData }}" alt="Letterhead">
     </div>
 @endif
 
 <div class="page">
 
-    <table style="margin-top:0">
+    <table class="header-table">
         <tr>
-
-            <td style="border:0">
-
-                <h1>
-                    {{ $company?->company_name ?? 'Crow.lk (Pvt) Ltd' }}
-                </h1>
+            <td>
+                <h1>{{ $company?->company_name ?? 'Crow.lk (Pvt) Ltd' }}</h1>
 
                 <div class="muted">
                     Quotation
                 </div>
-
             </td>
 
-            <td style="border:0" class="right">
-
+            <td class="right">
                 <h1>QUOTATION</h1>
 
-                <strong>
-                    {{ $quotation->number }}
-                </strong>
-
-                <br>
+                <strong>{{ $quotation->number }}</strong><br>
 
                 Issued:
-                {{ optional($quotation->issued_at)->format('Y-m-d') }}
+                {{ optional($quotation->issued_at)->format('Y-m-d') }}<br>
 
-                <br>
-
-                Valid until:
+                Valid Until:
                 {{ optional($quotation->valid_until)->format('Y-m-d') }}
-
             </td>
-
         </tr>
     </table>
 
-
     <h2>Bill To</h2>
 
-    {{ $quotation->customer->name ?? '-' }}<br>
+    <div>
+        <strong>{{ $quotation->customer->name ?? '-' }}</strong><br>
 
-    {{ $quotation->customer->company_name ?? '' }}<br>
+        @if($quotation->customer?->company_name)
+            {{ $quotation->customer->company_name }}<br>
+        @endif
 
-    {{ $quotation->customer->email ?? '' }}<br>
+        @if($quotation->customer?->email)
+            {{ $quotation->customer->email }}<br>
+        @endif
 
-    {{ $quotation->customer->phone ?? '' }}
-
+        @if($quotation->customer?->phone)
+            {{ $quotation->customer->phone }}
+        @endif
+    </div>
 
     @if($quotation->description)
+        <div class="box">
+            <strong>Description</strong><br><br>
 
-        <div class="note-box">
             {!! nl2br(e($quotation->description)) !!}
         </div>
-
     @endif
-
 
     <h2>Items</h2>
 
-
-    <table>
-
+    <table class="document-table">
         <thead>
-
-        <tr>
-
-            <th>Description</th>
-
-            <th class="right-cell">
-                Qty
-            </th>
-
-            <th class="right-cell">
-                Unit Price
-            </th>
-
-            <th class="right-cell">
-                Amount
-            </th>
-
-        </tr>
-
+            <tr>
+                <th>Description</th>
+                <th class="right-cell">Qty</th>
+                <th class="right-cell">Unit Price</th>
+                <th class="right-cell">Amount</th>
+            </tr>
         </thead>
 
-
         <tbody>
-
         @forelse($quotation->items as $item)
-
             <tr>
-
                 <td>
                     {{ $item->description ?? 'Item' }}
                 </td>
@@ -267,112 +252,75 @@ th {
                 </td>
 
                 <td class="right-cell">
-                    {{ number_format((float) $item->unit_price, 2) }}
+                    LKR {{ number_format((float) $item->unit_price, 2) }}
                 </td>
 
                 <td class="right-cell">
-                    {{ number_format((float) $item->total, 2) }}
+                    LKR {{ number_format((float) $item->total, 2) }}
                 </td>
-
             </tr>
-
         @empty
-
             <tr>
-
                 <td colspan="4">
                     No line items.
                 </td>
-
             </tr>
-
         @endforelse
-
         </tbody>
-
     </table>
 
-
-    <table class="total-table">
-
+    <table class="totals-table">
         <tr>
-            <td class="right-cell">Subtotal</td>
-
+            <td>Subtotal</td>
             <td class="right-cell">
-                {{ number_format((float) $quotation->subtotal, 2) }}
+                LKR {{ number_format((float) $quotation->subtotal, 2) }}
             </td>
         </tr>
 
         <tr>
-            <td class="right-cell">Discount</td>
-
+            <td>Discount</td>
             <td class="right-cell">
-                {{ number_format((float) $quotation->discount, 2) }}
+                LKR {{ number_format((float) $quotation->discount, 2) }}
             </td>
         </tr>
 
         <tr>
-            <td class="right-cell">Tax</td>
-
+            <td>Tax</td>
             <td class="right-cell">
-                {{ number_format((float) $quotation->tax, 2) }}
+                LKR {{ number_format((float) $quotation->tax, 2) }}
             </td>
         </tr>
 
         <tr>
-
+            <td class="total">Total</td>
             <td class="right-cell total">
-                Total (LKR)
+                LKR {{ number_format((float) $quotation->total, 2) }}
             </td>
-
-            <td class="right-cell total">
-                {{ number_format((float) $quotation->total, 2) }}
-            </td>
-
         </tr>
-
     </table>
-
 
     @if($quotation->notes)
-
-        <div class="note-box">
-
-            <strong>Notes</strong>
-
-            <br>
+        <div class="box">
+            <strong>Notes</strong><br><br>
 
             {!! nl2br(e($quotation->notes)) !!}
-
         </div>
-
     @endif
 
-
     <div class="bank-box">
-
-        <strong>Payment Details</strong>
-
-        <br>
+        <strong style="color:#f5a623;">Payment Details</strong><br><br>
 
         Account Name:
-        {{ $company?->bank_account_name ?? '-' }}
-
-        <br>
+        {{ $company?->bank_account_name ?? 'Crow.lk (Pvt) Ltd' }}<br>
 
         Bank:
-        {{ $company?->bank_name ?? '-' }}
-
-        <br>
+        {{ $company?->bank_name ?? 'HNB' }}<br>
 
         Branch:
-        {{ $company?->bank_branch ?? '-' }}
-
-        <br>
+        {{ $company?->bank_branch ?? 'Pettah' }}<br>
 
         Account Number:
-        {{ $company?->bank_account_number ?? '-' }}
-
+        {{ $company?->bank_account_number ?? '007010350044' }}
     </div>
 
 </div>

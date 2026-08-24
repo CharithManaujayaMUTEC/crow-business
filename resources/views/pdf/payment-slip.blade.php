@@ -6,25 +6,14 @@
     if ($company?->letterhead_path) {
         $possiblePaths = [
             public_path($company->letterhead_path),
-
-            storage_path(
-                'app/public/' . ltrim(
-                    str_replace(
-                        ['storage/', '/storage/'],
-                        '',
-                        $company->letterhead_path
-                    ),
-                    '/'
-                )
-            ),
+            storage_path('app/public/' . ltrim(str_replace('storage/', '', $company->letterhead_path), '/')),
         ];
 
         foreach ($possiblePaths as $path) {
             if (is_file($path)) {
                 $mime = mime_content_type($path) ?: 'image/png';
 
-                $letterheadData =
-                    'data:' . $mime . ';base64,' .
+                $letterheadData = 'data:' . $mime . ';base64,' .
                     base64_encode(file_get_contents($path));
 
                 break;
@@ -36,16 +25,11 @@
 <!doctype html>
 <html>
 <head>
-
 <meta charset="utf-8">
 
-<title>
-    Payment Receipt PAY-{{ $payment->id }}
-</title>
-
+<title>Payment Receipt PAY-{{ $payment->id }}</title>
 
 <style>
-
 @page {
     size: A4;
     margin: 0;
@@ -56,74 +40,68 @@ body {
     margin: 0;
     padding: 0;
     width: 210mm;
-    min-height: 297mm;
+    height: 297mm;
 }
 
 body {
     font-family: DejaVu Sans, Arial, sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     color: #ffffff;
+    background: #000000;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Letterhead Background
-|--------------------------------------------------------------------------
-*/
-
-.letterhead-background {
+.letterhead {
     position: fixed;
     top: 0;
     left: 0;
     width: 210mm;
     height: 297mm;
-    z-index: -1000;
+    z-index: 0;
 }
 
-.letterhead-background img {
+.letterhead img {
     width: 210mm;
     height: 297mm;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Content
-|--------------------------------------------------------------------------
-*/
-
 .page {
     position: relative;
-    padding: 210px 70px 145px 70px;
+    z-index: 1;
+    padding: 62mm 18mm 40mm 18mm;
 }
 
 h1 {
-    margin: 0 0 12px;
-    font-size: 24px;
+    margin: 0 0 10px;
+    font-size: 22px;
     color: #ffffff;
 }
 
 h2 {
-    margin: 18px 0 8px;
-    font-size: 14px;
+    margin: 16px 0 7px;
+    font-size: 13px;
     color: #f5a623;
 }
 
-table {
+.document-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 16px;
+    margin-top: 12px;
 }
 
-th,
-td {
+.document-table th,
+.document-table td {
+    padding: 8px 6px;
     border-bottom: 1px solid #777777;
-    padding: 8px;
 }
 
-th {
+.document-table th {
     color: #f5a623;
-    background: #111111;
+    background: #151515;
     text-align: left;
+}
+
+.document-table td {
+    color: #ffffff;
 }
 
 .right {
@@ -131,150 +109,85 @@ th {
 }
 
 .box {
-    margin-top: 18px;
-    padding: 12px;
+    margin-top: 14px;
+    padding: 10px;
     border: 1px solid #666666;
     background: #111111;
+    color: #ffffff;
 }
 
 .amount {
     margin-top: 20px;
-    font-size: 22px;
+    padding: 14px;
+    border: 1px solid #f5a623;
+    font-size: 18px;
     font-weight: bold;
     color: #f5a623;
+    background: #111111;
 }
-
 </style>
-
 </head>
-
 
 <body>
 
 @if($letterheadData)
-
-    <div class="letterhead-background">
-
-        <img
-            src="{{ $letterheadData }}"
-            alt="Letterhead"
-        >
-
+    <div class="letterhead">
+        <img src="{{ $letterheadData }}" alt="Letterhead">
     </div>
-
 @endif
-
 
 <div class="page">
 
-
-    {{-- Receipt Header --}}
-
     <h1>
-
-        {{ $company?->company_name ?? 'Crow.lk (Pvt) Ltd' }}
-
-        — PAYMENT RECEIPT
-
+        PAYMENT RECEIPT
     </h1>
-
-
-    {{-- Payment Information --}}
 
     <div class="box">
 
-        <strong>
-            Receipt:
-        </strong>
+        <strong>Receipt Number:</strong>
+        PAY-{{ $payment->id }}<br><br>
 
-        PAY-{{ $payment->id }}
+        <strong>Date:</strong>
+        {{ optional($payment->paid_at)->format('Y-m-d') }}<br><br>
 
-        <br>
+        <strong>Customer:</strong>
+        {{ $payment->customer->name ?? '-' }}<br>
 
+        @if($payment->customer?->company_name)
+            {{ $payment->customer->company_name }}<br>
+        @endif
 
-        <strong>
-            Date:
-        </strong>
-
-        {{ optional($payment->paid_at)->format('Y-m-d') }}
-
-        <br>
-
-
-        <strong>
-            Customer:
-        </strong>
-
-        {{ $payment->customer->name ?? '-' }}
+        @if($payment->customer?->email)
+            {{ $payment->customer->email }}<br>
+        @endif
 
         <br>
 
+        <strong>Invoice:</strong>
+        {{ $payment->invoice->number ?? '-' }}<br>
 
-        <strong>
-            Invoice:
-        </strong>
+        <strong>Payment Method:</strong>
+        {{ ucfirst($payment->method ?? '-') }}<br>
 
-        {{ $payment->invoice->number ?? '-' }}
-
-        <br>
-
-
-        <strong>
-            Payment Method:
-        </strong>
-
-        {{ ucfirst($payment->method ?? '-') }}
-
-        <br>
-
-
-        <strong>
-            Reference:
-        </strong>
-
+        <strong>Reference:</strong>
         {{ $payment->reference ?? '-' }}
 
     </div>
 
-
-    {{-- Payment Items --}}
-
     @if($payment->items && $payment->items->count())
 
-        <h2>
-            Payment Items
-        </h2>
+        <h2>Payment Items</h2>
 
-
-        <table>
+        <table class="document-table">
 
             <thead>
-
-            <tr>
-
-                <th>
-                    Description
-                </th>
-
-
-                <th class="right">
-                    Qty
-                </th>
-
-
-                <th class="right">
-                    Rate
-                </th>
-
-
-                <th class="right">
-                    Amount
-                </th>
-
-            </tr>
-
+                <tr>
+                    <th>Description</th>
+                    <th class="right">Qty</th>
+                    <th class="right">Rate</th>
+                    <th class="right">Amount</th>
+                </tr>
             </thead>
-
 
             <tbody>
 
@@ -286,19 +199,16 @@ th {
                         {{ $item->description ?? 'Item' }}
                     </td>
 
-
                     <td class="right">
                         {{ $item->quantity }}
                     </td>
 
-
                     <td class="right">
-                        {{ number_format((float) $item->unit_price, 2) }}
+                        LKR {{ number_format((float) $item->unit_price, 2) }}
                     </td>
 
-
                     <td class="right">
-                        {{ number_format((float) $item->total, 2) }}
+                        LKR {{ number_format((float) $item->total, 2) }}
                     </td>
 
                 </tr>
@@ -311,24 +221,19 @@ th {
 
     @endif
 
-
-    {{-- Paid Amount --}}
-
     <div class="amount">
 
-        Paid:
+        Paid Amount:
 
-        LKR
-        {{ number_format((float) $payment->amount, 2) }}
+        LKR {{ number_format((float) $payment->amount, 2) }}
 
     </div>
-
-
-    {{-- Notes --}}
 
     @if($payment->notes)
 
         <div class="box">
+
+            <strong>Notes</strong><br><br>
 
             {!! nl2br(e($payment->notes)) !!}
 
@@ -336,37 +241,27 @@ th {
 
     @endif
 
-
-    {{-- Bank Details --}}
-
     <div class="box">
 
-        <strong>
+        <strong style="color:#f5a623;">
             Payment Details
         </strong>
 
-        <br>
+        <br><br>
 
         Account Name:
-        {{ $company?->bank_account_name ?? '-' }}
-
-        <br>
+        {{ $company?->bank_account_name ?? 'Crow.lk (Pvt) Ltd' }}<br>
 
         Bank:
-        {{ $company?->bank_name ?? '-' }}
-
-        <br>
+        {{ $company?->bank_name ?? 'HNB' }}<br>
 
         Branch:
-        {{ $company?->bank_branch ?? '-' }}
-
-        <br>
+        {{ $company?->bank_branch ?? 'Pettah' }}<br>
 
         Account Number:
-        {{ $company?->bank_account_number ?? '-' }}
+        {{ $company?->bank_account_number ?? '007010350044' }}
 
     </div>
-
 
 </div>
 
