@@ -130,7 +130,7 @@
         if (seconds <= 0) {
             clearInterval(timer);
 
-            window.location.href = "{{ url('/admin') }}";
+            window.location.href = "{{ url('/admin/customers') }}";
         }
     }, 1000);
 </script>
