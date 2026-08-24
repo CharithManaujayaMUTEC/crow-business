@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class QuotationItem extends Model
+class PaymentItem extends Model
 {
     protected $fillable = [
-        'quotation_id',
+        'payment_id',
         'item_type',
         'item_id',
         'description',
@@ -25,26 +25,32 @@ class QuotationItem extends Model
         'total' => 'decimal:2',
     ];
 
-    public function quotation(): BelongsTo
+    public function payment(): BelongsTo
     {
-        return $this->belongsTo(Quotation::class);
+        return $this->belongsTo(Payment::class);
     }
 
     protected static function booted(): void
     {
-        static::saving(function (QuotationItem $item) {
+        static::saving(function (PaymentItem $item) {
             $item->total = round(
                 ((float) $item->quantity * (float) $item->unit_price),
                 2
             );
         });
 
-        static::saved(function (QuotationItem $item) {
-            $item->quotation?->recalculateTotals();
+        static::saved(function (PaymentItem $item) {
+            $item->payment?->updateQuietly([
+                'amount' => $item->payment->items()->sum('total'),
+            ]);
         });
 
-        static::deleted(function (QuotationItem $item) {
-            $item->quotation?->recalculateTotals();
+        static::deleted(function (PaymentItem $item) {
+            if ($item->payment) {
+                $item->payment->updateQuietly([
+                    'amount' => $item->payment->items()->sum('total'),
+                ]);
+            }
         });
     }
 }

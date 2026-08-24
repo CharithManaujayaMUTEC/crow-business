@@ -2,14 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\Quotation;
 use App\Models\Invoice;
+use App\Models\Quotation;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class QuotationService
 {
-    public function __construct(private DocumentNumberService $numbers) {}
+    public function __construct(private DocumentNumberService $numbers)
+    {
+    }
 
     public function convertToInvoice(Quotation $quotation): Invoice
     {
@@ -31,6 +33,7 @@ class QuotationService
                 'status' => 'issued',
                 'issued_at' => now()->toDateString(),
                 'due_at' => now()->addDays(7)->toDateString(),
+                'description' => $quotation->description,
                 'subtotal' => $quotation->subtotal,
                 'discount' => $quotation->discount,
                 'tax' => $quotation->tax,
