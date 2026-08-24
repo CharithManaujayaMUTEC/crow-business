@@ -71,7 +71,6 @@ jobs:
             --exclude="node_modules" \
             --exclude="storage/logs/*" \
             --exclude="public_html" \
-            --exclude="public/index.php" \
             --exclude="public/.htaccess" \
             ./ \
             production:${{ secrets.DEPLOY_PATH }}/
