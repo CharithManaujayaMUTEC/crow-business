@@ -1,13 +1,25 @@
 @php
     $company = \App\Models\CompanySetting::query()->first();
 
-    $letterheadPath = $company?->letterhead_path
-        ? public_path($company->letterhead_path)
-        : null;
+    $letterheadData = null;
 
-    $letterheadData = ($letterheadPath && is_file($letterheadPath))
-        ? 'data:image/png;base64,' . base64_encode(file_get_contents($letterheadPath))
-        : null;
+    if ($company?->letterhead_path) {
+        $possiblePaths = [
+            public_path($company->letterhead_path),
+            storage_path('app/public/' . ltrim(str_replace('storage/', '', $company->letterhead_path), '/')),
+        ];
+
+        foreach ($possiblePaths as $path) {
+            if (is_file($path)) {
+                $mime = mime_content_type($path) ?: 'image/png';
+
+                $letterheadData = 'data:' . $mime . ';base64,' .
+                    base64_encode(file_get_contents($path));
+
+                break;
+            }
+        }
+    }
 @endphp
 
 <!doctype html>
