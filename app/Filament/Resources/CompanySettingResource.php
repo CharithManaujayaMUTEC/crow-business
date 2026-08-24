@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use UnitEnum;
+
 use App\Filament\Resources\CompanySettingResource\Pages;
 use App\Models\CompanySetting;
 use Filament\Actions\EditAction;
@@ -23,7 +25,7 @@ class CompanySettingResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Company Settings';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     public static function form(Schema $schema): Schema
     {
@@ -95,3 +97,4 @@ class CompanySettingResource extends Resource
         ];
     }
 }
+
