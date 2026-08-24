@@ -60,6 +60,7 @@ body {
 }
 
 .letterhead img {
+    display: block;
     width: 210mm;
     height: 297mm;
 }
@@ -68,6 +69,7 @@ body {
     position: relative;
     z-index: 1;
     padding: 62mm 18mm 40mm 18mm;
+    color: #ffffff;
 }
 
 .header-table {
@@ -80,6 +82,7 @@ body {
     border: none;
     padding: 0;
     vertical-align: top;
+    color: #ffffff;
 }
 
 h1 {
@@ -92,6 +95,13 @@ h2 {
     margin: 16px 0 7px;
     font-size: 13px;
     color: #f5a623;
+}
+
+p,
+span,
+div,
+strong {
+    color: #ffffff;
 }
 
 .muted {
@@ -138,10 +148,11 @@ h2 {
 .totals-table td {
     padding: 6px;
     border-bottom: 1px solid #555555;
+    color: #ffffff;
 }
 
 .total {
-    color: #f5a623;
+    color: #f5a623 !important;
     font-size: 13px;
     font-weight: bold;
 }
@@ -164,6 +175,7 @@ h2 {
 
 .small {
     font-size: 9px;
+    color: #dddddd;
 }
 </style>
 </head>

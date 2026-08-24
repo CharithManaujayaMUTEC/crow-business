@@ -60,6 +60,7 @@ body {
 }
 
 .letterhead img {
+    display: block;
     width: 210mm;
     height: 297mm;
 }
@@ -68,6 +69,7 @@ body {
     position: relative;
     z-index: 1;
     padding: 62mm 18mm 40mm 18mm;
+    color: #ffffff;
 }
 
 h1 {
@@ -80,6 +82,14 @@ h2 {
     margin: 16px 0 7px;
     font-size: 13px;
     color: #f5a623;
+}
+
+/* Force normal document text to remain visible */
+p,
+span,
+div,
+strong {
+    color: #ffffff;
 }
 
 .document-table {
@@ -116,14 +126,22 @@ h2 {
     color: #ffffff;
 }
 
+.box * {
+    color: #ffffff;
+}
+
 .amount {
     margin-top: 20px;
     padding: 14px;
     border: 1px solid #f5a623;
     font-size: 18px;
     font-weight: bold;
-    color: #f5a623;
+    color: #f5a623 !important;
     background: #111111;
+}
+
+.amount * {
+    color: #f5a623 !important;
 }
 </style>
 </head>
