@@ -70,7 +70,6 @@ jobs:
             --exclude="vendor" \
             --exclude="node_modules" \
             --exclude="storage/logs/*" \
-            --exclude="public_html" \
             --exclude="public/.htaccess" \
             ./ \
             production:${{ secrets.DEPLOY_PATH }}/
