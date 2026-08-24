@@ -74,6 +74,16 @@ jobs:
             ./ \
             production:${{ secrets.DEPLOY_PATH }}/
 
+      - name: Copy Laravel Public Files to Domain Root
+        run: |
+          ssh -F "$HOME/.ssh/config" production << EOF
+            set -e
+
+            cd "${{ secrets.DEPLOY_PATH }}"
+
+            cp -a public/. .
+          EOF
+
       - name: Run Laravel Production Commands
         run: |
           ssh -F "$HOME/.ssh/config" production << EOF
