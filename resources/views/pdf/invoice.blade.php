@@ -68,7 +68,7 @@ body {
 .page {
     position: relative;
     z-index: 1;
-    padding: 28mm 18mm 40mm 18mm;
+    padding: 20mm 18mm 40mm 18mm;
 }
 
 .header-table {
