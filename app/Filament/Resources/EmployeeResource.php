@@ -441,10 +441,52 @@ class EmployeeResource extends Resource
             ])
             ->defaultSort('created_at', 'desc');
     }
-
-    public static function infolist(\Filament\Infolists\Infolist $infolist): \Filament\Infolists\Infolist
+    
+    public static function infolist(Schema $schema): Schema
     {
-        return \App\Filament\Resources\EmployeeResource\Infolists\EmployeeInfolist::make($infolist);
+        return $schema->components([
+            Section::make('Employee Overview')
+                ->schema([
+                    TextEntry::make('employee_no')
+                        ->label('Employee Number'),
+
+                    TextEntry::make('name')
+                        ->label('Full Name'),
+
+                    TextEntry::make('preferred_name')
+                        ->label('Preferred Name')
+                        ->placeholder('-'),
+
+                    TextEntry::make('designation')
+                        ->label('Designation')
+                        ->placeholder('-'),
+
+                    TextEntry::make('department')
+                        ->label('Department')
+                        ->placeholder('-'),
+
+                    TextEntry::make('status')
+                        ->badge(),
+
+                    TextEntry::make('employment_type')
+                        ->label('Employment Type')
+                        ->placeholder('-'),
+
+                    TextEntry::make('join_date')
+                        ->label('Joining Date')
+                        ->date()
+                        ->placeholder('-'),
+
+                    TextEntry::make('basic_salary')
+                        ->label('Basic Salary')
+                        ->money('LKR'),
+
+                    TextEntry::make('reportingManager.name')
+                        ->label('Reporting Manager')
+                        ->placeholder('-'),
+                ])
+                ->columns(2),
+        ]);
     }
 
     public static function getPages(): array
