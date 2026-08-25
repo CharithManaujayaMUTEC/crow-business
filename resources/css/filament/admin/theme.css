@@ -1,7 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament';
+@source '../../../../resources/views';
+@source '../../../../vendor/filament';
+@source '../../../../vendor/livewire';
 
 /* =========================================
    GLOBAL COMPACT FILAMENT FORM SPACING
