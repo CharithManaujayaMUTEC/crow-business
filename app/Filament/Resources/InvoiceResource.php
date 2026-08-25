@@ -24,7 +24,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Schemas\Components\Grid;
 
 class InvoiceResource extends Resource
 {
@@ -33,11 +32,6 @@ class InvoiceResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Grid::make([
-                'default' => 1,
-                'xl' => 2,
-            ])
-                ->schema([            
             Section::make('Invoice Details')
                 ->schema([
                     Select::make('customer_id')
@@ -270,12 +264,13 @@ class InvoiceResource extends Resource
                     Textarea::make('notes')
                         ->columnSpanFull(),
                 ])
-                        ->columns(2),
-
-                ]),
-
+                ->columns(2),
+                ])
+        ->columns([
+            'default' => 1,
+            'xl' => 2,
         ]);
-   }
+    }
     
     public static function table(Table $table): Table
     {
