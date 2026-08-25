@@ -35,7 +35,11 @@ TextInput::make('tax_rate')->numeric()->default(0),
 Toggle::make('is_recurring')->default(false),
 Select::make('recurring_interval')->options(['monthly'=>'Monthly','yearly'=>'Yearly']),
 Toggle::make('is_active')->default(true)
-        ]);
+])
+->columns([
+    'default' => 1,
+    'xl' => 2,
+]);
     }
 
     public static function table(Table $table): Table

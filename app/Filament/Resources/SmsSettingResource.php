@@ -32,7 +32,11 @@ TextInput::make('api_user_id'),
 TextInput::make('api_key')->password()->revealable(),
 TextInput::make('sender_id')->default('Crow.lk'),
 TextInput::make('country_code')->default('94')
-        ]);
+])
+->columns([
+    'default' => 1,
+    'xl' => 2,
+]);
     }
 
     public static function table(Table $table): Table

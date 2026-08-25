@@ -265,9 +265,13 @@ class InvoiceResource extends Resource
                         ->columnSpanFull(),
                 ])
                 ->columns(2),
+                ])
+        ->columns([
+            'default' => 1,
+            'xl' => 2,
         ]);
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table

@@ -37,7 +37,11 @@ DatePicker::make('start_date')->required(),
 DatePicker::make('next_billing_date')->required(),
 Select::make('status')->options(['active'=>'Active','paused'=>'Paused','cancelled'=>'Cancelled'])->default('active'),
 Toggle::make('auto_invoice')->default(true)
-        ]);
+])
+->columns([
+    'default' => 1,
+    'xl' => 2,
+]);
     }
 
     public static function table(Table $table): Table

@@ -64,7 +64,11 @@ class CompanySettingResource extends Resource
                         ->required(),
                 ])
                 ->columns(2),
-        ]);
+                ])
+                ->columns([
+                    'default' => 1,
+                    'xl' => 2,
+                ]);
     }
 
     public static function table(Table $table): Table

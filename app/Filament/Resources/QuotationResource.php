@@ -261,6 +261,10 @@ class QuotationResource extends Resource
                         ->columnSpanFull(),
                 ])
                 ->columns(2),
+                ])
+        ->columns([
+            'default' => 1,
+            'xl' => 2,
         ]);
     }
 

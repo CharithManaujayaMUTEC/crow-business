@@ -35,7 +35,11 @@ TextInput::make('whatsapp'),
 Textarea::make('address')->columnSpanFull(),
 Textarea::make('notes')->columnSpanFull(),
 Select::make('status')->options(['active'=>'Active','inactive'=>'Inactive'])->default('active')
-        ]);
+])
+->columns([
+    'default' => 1,
+    'xl' => 2,
+]);
     }
 
     public static function table(Table $table): Table

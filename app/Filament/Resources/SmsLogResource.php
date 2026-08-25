@@ -37,7 +37,11 @@ Textarea::make('message')->required()->columnSpanFull(),
 Select::make('status')->options(['sent'=>'Sent','failed'=>'Failed','disabled'=>'Disabled'])->required(),
 Textarea::make('provider_response')->columnSpanFull(),
 DateTimePicker::make('sent_at')
-        ]);
+])
+->columns([
+    'default' => 1,
+    'xl' => 2,
+]);
     }
 
     public static function table(Table $table): Table

@@ -39,7 +39,11 @@ TextInput::make('reference'),
 FileUpload::make('invoice_path')->directory('expenses/invoices')->disk('public'),
 FileUpload::make('quotation_path')->directory('expenses/quotations')->disk('public'),
 Textarea::make('notes')->columnSpanFull()
-        ]);
+])
+->columns([
+    'default' => 1,
+    'xl' => 2,
+]);
     }
 
     public static function table(Table $table): Table

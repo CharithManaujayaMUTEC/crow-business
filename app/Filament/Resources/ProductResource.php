@@ -33,7 +33,11 @@ Textarea::make('description')->columnSpanFull(),
 TextInput::make('price')->numeric()->prefix('LKR')->required(),
 TextInput::make('tax_rate')->numeric()->default(0),
 Toggle::make('is_active')->default(true)
-        ]);
+])
+->columns([
+    'default' => 1,
+    'xl' => 2,
+]);
     }
 
     public static function table(Table $table): Table

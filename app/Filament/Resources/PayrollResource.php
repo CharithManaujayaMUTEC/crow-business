@@ -37,7 +37,11 @@ TextInput::make('deduction')->numeric()->default(0),
 TextInput::make('net_salary')->numeric()->required(),
 Select::make('status')->options(['pending'=>'Pending','paid'=>'Paid'])->default('pending'),
 Textarea::make('notes')->columnSpanFull()
-        ]);
+])
+->columns([
+    'default' => 1,
+    'xl' => 2,
+]);
     }
 
     public static function table(Table $table): Table

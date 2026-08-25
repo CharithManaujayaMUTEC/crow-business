@@ -234,6 +234,10 @@ class PaymentResource extends Resource
                         ->collapsible()
                         ->columnSpanFull(),
                 ]),
+                ])
+        ->columns([
+            'default' => 1,
+            'xl' => 2,
         ]);
     }
 
