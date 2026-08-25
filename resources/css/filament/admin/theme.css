@@ -8,52 +8,98 @@
 @source '../../../../vendor/livewire';
 
 /* =========================================
-   GLOBAL COMPACT FILAMENT FORM SPACING
+   COMPACT FILAMENT ADMIN
    ========================================= */
 
-/* Reduce vertical spacing between form components */
-.fi-fo-component-ctn {
-    margin-bottom: 0.75rem;
-}
-
-/* Reduce gaps inside grids */
-.fi-fo-component-ctn > .grid,
-.fi-fo-field-wrp > .grid {
-    row-gap: 0.75rem !important;
-}
-
-/* Reduce overall form spacing */
+/* Reduce general form gaps */
 .fi-fo {
-    gap: 0.75rem !important;
+    gap: 0.5rem !important;
 }
 
-/* Make sections more compact */
-.fi-section {
-    gap: 0.75rem !important;
-}
-
-/* Reduce section content padding */
-.fi-section-content {
-    padding: 1rem !important;
-}
-
-/* Remove unnecessary vertical padding around fields */
+/* Reduce spacing between form components */
 .fi-fo-component-ctn {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    margin-bottom: 0.5rem !important;
 }
 
-/* Compact repeaters */
+/* Reduce field wrapper spacing */
+.fi-fo-field-wrp {
+    gap: 0.25rem !important;
+}
+
+/* Compact grids */
+.fi-fo-component-ctn > .grid,
+.fi-fo-field-wrp > .grid,
+.fi-fo-grid {
+    row-gap: 0.5rem !important;
+    column-gap: 0.75rem !important;
+}
+
+/* Compact sections */
+.fi-section {
+    gap: 0.5rem !important;
+}
+
+.fi-section-content {
+    padding: 0.75rem !important;
+}
+
+/* Reduce vertical spacing inside sections */
+.fi-section-content-ctn {
+    gap: 0.5rem !important;
+}
+
+/* =========================================
+   COMPACT REPEATERS
+   ========================================= */
+
+/* Reduce gap between repeater items */
 .fi-fo-repeater {
-    gap: 0.75rem !important;
+    gap: 0.5rem !important;
 }
 
-/* Reduce spacing inside repeater items */
+/* Reduce repeater item padding */
+.fi-fo-repeater-item {
+    margin-bottom: 0.5rem !important;
+}
+
+/* Reduce repeater content padding */
 .fi-fo-repeater-item-content {
-    gap: 0.75rem !important;
+    padding: 0.75rem !important;
 }
 
-/* Reduce space before form actions */
+/* Compact spacing inside repeater */
+.fi-fo-repeater-item-content > .grid,
+.fi-fo-repeater-item-content .fi-fo {
+    gap: 0.5rem !important;
+    row-gap: 0.5rem !important;
+}
+
+/* =========================================
+   COMPACT FIELD SPACING
+   ========================================= */
+
+.fi-fo-field-wrp-label {
+    margin-bottom: 0.2rem !important;
+}
+
+.fi-fo-field-wrp-label label {
+    line-height: 1.2 !important;
+}
+
+/* Reduce textarea minimum height */
+.fi-fo-textarea textarea {
+    min-height: 3rem !important;
+}
+
+/* Reduce spacing before actions */
 .fi-fo-actions {
-    margin-top: 1rem !important;
+    margin-top: 0.75rem !important;
+}
+
+/* =========================================
+   COMPACT REPEATER ADD BUTTON
+   ========================================= */
+
+.fi-fo-repeater-add-action-btn {
+    margin-top: 0.25rem !important;
 }
