@@ -274,15 +274,14 @@ class PaymentResource extends Resource
                         );
                     }),
 
-                \Filament\Actions\Action::make('open_slip')
-                    ->label('Open Slip')
-                    ->url(fn (Payment $record) =>
-                        $record->payment_slip_path
-                            ? \Illuminate\Support\Facades\Storage::disk('public')->url($record->payment_slip_path)
-                            : null
-                    )
-                    ->openUrlInNewTab()
-                    ->visible(fn (Payment $record) => filled($record->payment_slip_path)),
+                \Filament\Actions\Action::make('view_slip')
+                    ->label('View PDF')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn (Payment $record) => route(
+                        'pdf.payment',
+                        $record
+                    ))
+                    ->openUrlInNewTab(),
 
                 DeleteAction::make(),
             ])

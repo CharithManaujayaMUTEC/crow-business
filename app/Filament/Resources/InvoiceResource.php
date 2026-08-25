@@ -307,15 +307,14 @@ class InvoiceResource extends Resource
                         );
                     }),
 
-                Action::make('open_pdf')
-                    ->label('Open PDF')
-                    ->url(fn (Invoice $record) =>
-                        $record->pdf_path
-                            ? \Illuminate\Support\Facades\Storage::disk('public')->url($record->pdf_path)
-                            : null
-                    )
-                    ->openUrlInNewTab()
-                    ->visible(fn (Invoice $record) => filled($record->pdf_path)),
+                Action::make('view_pdf')
+                    ->label('View PDF')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn (Invoice $record) => route(
+                        'pdf.invoice',
+                        $record
+                    ))
+                    ->openUrlInNewTab(),
 
                 DeleteAction::make(),
             ])

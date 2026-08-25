@@ -280,6 +280,15 @@ class QuotationResource extends Resource
             ->recordActions([
                 EditAction::make(),
 
+                Action::make('view_pdf')
+                    ->label('View PDF')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn (Quotation $record) => route(
+                        'pdf.quotation',
+                        $record
+                    ))
+                    ->openUrlInNewTab(),
+
                 Action::make('pdf')
                     ->label('Download PDF')
                     ->icon('heroicon-o-arrow-down-tray')
