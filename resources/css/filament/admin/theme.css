@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* =========================================
+   GLOBAL COMPACT FILAMENT FORM SPACING
+   ========================================= */
+
+/* Reduce vertical spacing between form components */
+.fi-fo-component-ctn {
+    margin-bottom: 0.75rem;
+}
+
+/* Reduce gaps inside grids */
+.fi-fo-component-ctn > .grid,
+.fi-fo-field-wrp > .grid {
+    row-gap: 0.75rem !important;
+}
+
+/* Reduce overall form spacing */
+.fi-fo {
+    gap: 0.75rem !important;
+}
+
+/* Make sections more compact */
+.fi-section {
+    gap: 0.75rem !important;
+}
+
+/* Reduce section content padding */
+.fi-section-content {
+    padding: 1rem !important;
+}
+
+/* Remove unnecessary vertical padding around fields */
+.fi-fo-component-ctn {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Compact repeaters */
+.fi-fo-repeater {
+    gap: 0.75rem !important;
+}
+
+/* Reduce spacing inside repeater items */
+.fi-fo-repeater-item-content {
+    gap: 0.75rem !important;
+}
+
+/* Reduce space before form actions */
+.fi-fo-actions {
+    margin-top: 1rem !important;
+}
