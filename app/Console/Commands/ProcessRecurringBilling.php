@@ -6,28 +6,43 @@ use App\Models\Invoice;
 use App\Models\RecurringBilling;
 use App\Models\RecurringService;
 use App\Services\DocumentNumberService;
+use App\Services\Sms\NotifySmsService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class ProcessRecurringBilling extends Command
 {
     protected $signature = 'crow:recurring-billing';
+
     protected $description = 'Generate invoices for recurring services due today.';
 
-    public function handle(DocumentNumberService $numbers): int
-    {
-        RecurringService::with(['customer','service'])
+    public function handle(
+        DocumentNumberService $numbers,
+        NotifySmsService $sms
+    ): int {
+        RecurringService::with(['customer', 'service'])
             ->where('status', 'active')
             ->whereDate('next_billing_date', '<=', today())
-            ->chunkById(100, function ($services) use ($numbers) {
+            ->chunkById(100, function ($services) use ($numbers, $sms) {
                 foreach ($services as $service) {
-                    DB::transaction(function () use ($service, $numbers) {
+                    $invoice = DB::transaction(function () use (
+                        $service,
+                        $numbers
+                    ) {
                         $billing = RecurringBilling::firstOrCreate(
-                            ['recurring_service_id' => $service->id, 'billing_date' => $service->next_billing_date],
-                            ['amount' => $service->amount, 'status' => 'pending']
+                            [
+                                'recurring_service_id' => $service->id,
+                                'billing_date' => $service->next_billing_date,
+                            ],
+                            [
+                                'amount' => $service->amount,
+                                'status' => 'pending',
+                            ]
                         );
 
-                        if ($billing->invoice_id) return;
+                        if ($billing->invoice_id) {
+                            return null;
+                        }
 
                         $invoice = Invoice::create([
                             'customer_id' => $service->customer_id,
@@ -40,7 +55,8 @@ class ProcessRecurringBilling extends Command
                             'discount' => 0,
                             'total' => $service->amount,
                             'balance' => $service->amount,
-                            'notes' => 'Recurring service: '.$service->service->name,
+                            'notes' => 'Recurring service: '
+                                . $service->service->name,
                         ]);
 
                         $invoice->items()->create([
@@ -53,18 +69,47 @@ class ProcessRecurringBilling extends Command
                             'total' => $service->amount,
                         ]);
 
-                        $billing->update(['invoice_id' => $invoice->id, 'status' => 'invoiced']);
+                        $billing->update([
+                            'invoice_id' => $invoice->id,
+                            'status' => 'invoiced',
+                        ]);
 
                         $service->update([
-                            'next_billing_date' => $service->frequency === 'yearly'
-                                ? $service->next_billing_date->addYear()
-                                : $service->next_billing_date->addMonth(),
+                            'next_billing_date' =>
+                                $service->frequency === 'yearly'
+                                    ? $service->next_billing_date->copy()->addYear()
+                                    : $service->next_billing_date->copy()->addMonth(),
                         ]);
+
+                        return $invoice;
                     });
+
+                    if (
+                        $invoice &&
+                        $service->customer?->phone
+                    ) {
+                        $amount = number_format(
+                            (float) $invoice->total,
+                            2
+                        );
+
+                        $message = "Crow.lk: Your recurring service invoice {$invoice->number} has been generated for LKR {$amount}. Payment is due on "
+                            . $invoice->due_at->format('d/m/Y')
+                            . '.';
+
+                        $sms->send(
+                            customer: $service->customer,
+                            message: $message,
+                            type: 'recurring_invoice',
+                            referenceType: 'invoice',
+                            referenceId: $invoice->id,
+                        );
+                    }
                 }
             });
 
         $this->info('Recurring billing processed.');
+
         return self::SUCCESS;
     }
 }
