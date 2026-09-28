@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Invoice;
-use App\Models\SmsLog;
 use App\Services\Sms\NotifySmsService;
 use Illuminate\Console\Command;
 
@@ -34,65 +33,31 @@ class SendPaymentReminders extends Command
                         false
                     );
 
-                    $type = null;
-                    $message = null;
+                    $type = match ($daysUntilDue) {
+                        3 => 'payment_reminder_3_days',
+                        0 => 'payment_reminder_due_today',
+                        -3 => 'payment_reminder_overdue_3',
+                        -7 => 'payment_reminder_overdue_7',
+                        default => null,
+                    };
 
-                    if ($daysUntilDue === 3) {
-                        $type = 'payment_reminder_3_days';
-
-                        $message =
-                            "Crow.lk reminder: Invoice {$invoice->number} has an outstanding balance of LKR "
-                            . number_format((float) $invoice->balance, 2)
-                            . '. Payment is due on '
-                            . $invoice->due_at->format('d/m/Y')
-                            . '.';
-                    }
-
-                    if ($daysUntilDue === 0) {
-                        $type = 'payment_reminder_due_today';
-
-                        $message =
-                            "Crow.lk reminder: Invoice {$invoice->number} is due today. Outstanding balance: LKR "
-                            . number_format((float) $invoice->balance, 2)
-                            . '.';
-                    }
-
-                    if ($daysUntilDue === -3) {
-                        $type = 'payment_reminder_overdue_3';
-
-                        $message =
-                            "Crow.lk reminder: Invoice {$invoice->number} is now 3 days overdue. Outstanding balance: LKR "
-                            . number_format((float) $invoice->balance, 2)
-                            . '. Please settle the payment at your earliest convenience.';
-                    }
-
-                    if ($daysUntilDue === -7) {
-                        $type = 'payment_reminder_overdue_7';
-
-                        $message =
-                            "Crow.lk final reminder: Invoice {$invoice->number} is now 7 days overdue. Outstanding balance: LKR "
-                            . number_format((float) $invoice->balance, 2)
-                            . '. Please contact us or settle the outstanding amount.';
-                    }
-
-                    if (! $type || ! $message) {
+                    if (! $type) {
                         continue;
                     }
 
-                    $alreadySent = SmsLog::query()
-                        ->where('reference_type', 'invoice')
-                        ->where('reference_id', $invoice->id)
-                        ->where('type', $type)
-                        ->exists();
-
-                    if ($alreadySent) {
-                        continue;
-                    }
-
-                    $sms->send(
+                    $sms->sendTemplate(
                         customer: $invoice->customer,
-                        message: $message,
                         type: $type,
+                        variables: [
+                            'invoice_number' => $invoice->number,
+                            'balance' => (string) $invoice->balance,
+                            'balance_formatted' => number_format(
+                                (float) $invoice->balance,
+                                2
+                            ),
+                            'due_date' => $invoice->due_at->format('d/m/Y'),
+                            'days_until_due' => (string) $daysUntilDue,
+                        ],
                         referenceType: 'invoice',
                         referenceId: $invoice->id,
                     );

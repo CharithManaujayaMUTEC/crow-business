@@ -4,6 +4,7 @@ namespace App\Services\Sms;
 
 use App\Models\Customer;
 use App\Models\SmsLog;
+use App\Models\SmsNotificationTemplate;
 use App\Models\SmsSetting;
 use Illuminate\Support\Facades\Http;
 
@@ -23,6 +24,51 @@ class NotifySmsService
             referenceType: $referenceType,
             referenceId: $referenceId,
             customerId: $customer->id,
+        );
+    }
+
+    public function sendTemplate(
+        Customer $customer,
+        string $type,
+        array $variables = [],
+        ?string $referenceType = null,
+        ?int $referenceId = null
+    ): ?SmsLog {
+        $template = SmsNotificationTemplate::query()
+            ->where('key', $type)
+            ->first();
+
+        if (! $template || ! $template->enabled) {
+            return null;
+        }
+
+        if ($this->isOnCooldown(
+            customerId: $customer->id,
+            type: $type,
+            referenceType: $referenceType,
+            referenceId: $referenceId,
+            cooldownMinutes: (int) $template->cooldown_minutes,
+        )) {
+            return null;
+        }
+
+        $variables = array_merge([
+            'customer_name' => $customer->name ?? '',
+            'company_name' => $customer->company_name ?? '',
+            'app_name' => config('app.name', 'Crow.lk'),
+        ], $variables);
+
+        $message = $this->renderTemplate(
+            $template->message,
+            $variables
+        );
+
+        return $this->send(
+            customer: $customer,
+            message: $message,
+            type: $type,
+            referenceType: $referenceType,
+            referenceId: $referenceId,
         );
     }
 
@@ -101,8 +147,56 @@ class NotifySmsService
         }
     }
 
-    protected function normalize(string $phone, string $countryCode): string
-    {
+    protected function renderTemplate(
+        string $message,
+        array $variables
+    ): string {
+        foreach ($variables as $key => $value) {
+            $message = str_replace(
+                '{' . $key . '}',
+                (string) ($value ?? ''),
+                $message
+            );
+        }
+
+        return $message;
+    }
+
+    protected function isOnCooldown(
+        ?int $customerId,
+        string $type,
+        ?string $referenceType,
+        ?int $referenceId,
+        int $cooldownMinutes
+    ): bool {
+        if ($cooldownMinutes <= 0) {
+            return false;
+        }
+
+        $query = SmsLog::query()
+            ->where('type', $type)
+            ->where('status', 'sent')
+            ->where('created_at', '>=', now()->subMinutes($cooldownMinutes));
+
+        if ($customerId !== null) {
+            $query->where('customer_id', $customerId);
+        }
+
+        if ($referenceType !== null) {
+            $query->where('reference_type', $referenceType);
+        }
+
+        if ($referenceId !== null) {
+            $query->where('reference_id', $referenceId);
+        }
+
+        return $query->exists();
+    }
+
+    protected function normalize(
+        string $phone,
+        string $countryCode
+    ): string {
         $phone = preg_replace('/\D+/', '', $phone);
 
         if (str_starts_with($phone, '0')) {
