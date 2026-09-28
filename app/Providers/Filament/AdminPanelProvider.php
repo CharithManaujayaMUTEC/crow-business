@@ -27,8 +27,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            
             ->plugins([
-                FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make()
+                    ->navigationLabel('Roles')
+                    ->navigationIcon('heroicon-o-shield-check')
+                    ->navigationGroup(null)
+                    ->navigationSort(101),
             ])
             ->brandLogo(asset('images/crow-logo.png'))
             ->brandLogoHeight('2.5rem')
@@ -76,6 +81,7 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 }
+
 
 
 
