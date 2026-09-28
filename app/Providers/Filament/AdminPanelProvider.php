@@ -27,6 +27,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->plugins([
+                FilamentShieldPlugin::make(),
+            ])
             ->brandLogo(asset('images/crow-logo.png'))
             ->brandLogoHeight('2.5rem')
             ->brandName('Crow.lk Business Admin')
@@ -73,3 +76,6 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 }
+
+
+

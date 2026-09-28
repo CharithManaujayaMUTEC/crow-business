@@ -41,6 +41,8 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static ?int $navigationSort = 101;
+
     #[Override]
     public static function form(Schema $schema): Schema
     {
@@ -168,3 +170,4 @@ class RoleResource extends Resource
         return FilamentShieldPlugin::get();
     }
 }
+
