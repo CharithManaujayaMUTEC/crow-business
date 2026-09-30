@@ -1,6 +1,17 @@
 @php
     $company = \App\Models\CompanySetting::query()->first();
 
+    $logoData = null;
+
+    $logoPath = public_path('images/crow-logo.png');
+
+    if (is_file($logoPath)) {
+        $logoMime = mime_content_type($logoPath) ?: 'image/png';
+
+        $logoData = 'data:' . $logoMime . ';base64,' .
+            base64_encode(file_get_contents($logoPath));
+    }
+
     $letterheadData = null;
 
     if ($company?->letterhead_path) {
@@ -82,6 +93,16 @@ body {
     border: none;
     padding: 0;
     vertical-align: top;
+}
+
+.logo-cell {
+    text-align: left;
+    vertical-align: top;
+}
+
+.company-logo {
+    width: 42mm;
+    height: auto;
 }
 
 h1 {
@@ -201,6 +222,14 @@ h2 {
         </colgroup>
 
         <tr>
+
+            <td class="logo-cell">
+
+                @if($logoData)
+                    <img src="{{ $logoData }}" class="company-logo" alt="Crow.lk">
+                @endif
+
+            </td>
 
             <td class="right">
 
