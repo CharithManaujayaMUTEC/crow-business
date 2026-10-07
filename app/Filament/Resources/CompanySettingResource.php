@@ -1,10 +1,8 @@
 <?php
 
 namespace App\Filament\Resources;
-use Filament\Support\Icons\Heroicon;
 
 use BackedEnum;
-
 use UnitEnum;
 
 use App\Filament\Resources\CompanySettingResource\Pages;
@@ -17,10 +15,10 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Support\Icons\Heroicon;
 
 class CompanySettingResource extends Resource
 {
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
     protected static ?string $model = CompanySetting::class;
@@ -47,7 +45,9 @@ class CompanySettingResource extends Resource
                         ->disk('public')
                         ->directory('images')
                         ->imageEditor()
-                        ->helperText('Used as the full-page background for quotations, invoices and payment receipts.'),
+                        ->helperText(
+                            'Used as the full-page background for quotations, invoices and payment receipts.'
+                        ),
                 ])
                 ->columns(2),
 
@@ -70,46 +70,44 @@ class CompanySettingResource extends Resource
                         ->required(),
                 ])
                 ->columns(2),
+
+            Section::make('Payroll Contribution Rates')
+                ->description(
+                    'Configure the company EPF and ETF contribution percentages used for payroll calculations.'
+                )
+                ->schema([
+                    TextInput::make('epf_employee_rate')
+                        ->label('EPF - Employee Rate')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(100)
+                        ->step(0.01)
+                        ->suffix('%')
+                        ->default(8.00)
+                        ->required(),
+
+                    TextInput::make('epf_employer_rate')
+                        ->label('EPF - Employer Rate')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(100)
+                        ->step(0.01)
+                        ->suffix('%')
+                        ->default(12.00)
+                        ->required(),
+
+                    TextInput::make('etf_employer_rate')
+                        ->label('ETF - Employer Rate')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(100)
+                        ->step(0.01)
+                        ->suffix('%')
+                        ->default(3.00)
+                        ->required(),
                 ])
-                ->columns([
-                    'default' => 1,
-                    'xl' => 2,
-
-                Section::make('Payroll Contribution Rates')
-                    ->description('Configure the company EPF and ETF contribution percentages used for payroll calculations.')
-                    ->schema([
-                        TextInput::make('epf_employee_rate')
-                            ->label('EPF - Employee Rate')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->step(0.01)
-                            ->suffix('%')
-                            ->default(8.00)
-                            ->required(),
-
-                        TextInput::make('epf_employer_rate')
-                            ->label('EPF - Employer Rate')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->step(0.01)
-                            ->suffix('%')
-                            ->default(12.00)
-                            ->required(),
-
-                        TextInput::make('etf_employer_rate')
-                            ->label('ETF - Employer Rate')
-                            ->numeric()
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->step(0.01)
-                            ->suffix('%')
-                            ->default(3.00)
-                            ->required(),
-                    ])
-                    ->columns(3),
-                ]);
+                ->columns(3),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -142,5 +140,3 @@ class CompanySettingResource extends Resource
         ];
     }
 }
-
-
