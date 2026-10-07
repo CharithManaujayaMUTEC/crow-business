@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\LeaveRequests;
 
-use UnitEnum;
-
 use App\Filament\Resources\LeaveRequests\Pages\CreateLeaveRequest;
 use App\Filament\Resources\LeaveRequests\Pages\EditLeaveRequest;
 use App\Filament\Resources\LeaveRequests\Pages\ListLeaveRequests;
@@ -15,17 +13,23 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class LeaveRequestResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'HR';
-    protected static ?int $navigationSort = 30;
 
+    protected static ?int $navigationSort = 30;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCheck;
 
     protected static ?string $model = LeaveRequest::class;
-protected static ?string $recordTitleAttribute = 'name\');';
+
+    protected static ?string $navigationLabel = 'Leave Requests';
+
+    protected static ?string $modelLabel = 'Leave Request';
+
+    protected static ?string $pluralModelLabel = 'Leave Requests';
 
     public static function form(Schema $schema): Schema
     {
@@ -39,9 +43,7 @@ protected static ?string $recordTitleAttribute = 'name\');';
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

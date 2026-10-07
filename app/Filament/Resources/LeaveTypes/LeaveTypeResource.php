@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\LeaveTypes;
 
-use UnitEnum;
-
 use App\Filament\Resources\LeaveTypes\Pages\CreateLeaveType;
 use App\Filament\Resources\LeaveTypes\Pages\EditLeaveType;
 use App\Filament\Resources\LeaveTypes\Pages\ListLeaveTypes;
@@ -15,17 +13,23 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class LeaveTypeResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'HR';
-    protected static ?int $navigationSort = 40;
 
+    protected static ?int $navigationSort = 40;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
     protected static ?string $model = LeaveType::class;
-protected static ?string $recordTitleAttribute = 'ilament\Forms\Components\Toggle;';
+
+    protected static ?string $navigationLabel = 'Leave Types';
+
+    protected static ?string $modelLabel = 'Leave Type';
+
+    protected static ?string $pluralModelLabel = 'Leave Types';
 
     public static function form(Schema $schema): Schema
     {
@@ -39,9 +43,7 @@ protected static ?string $recordTitleAttribute = 'ilament\Forms\Components\Toggl
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

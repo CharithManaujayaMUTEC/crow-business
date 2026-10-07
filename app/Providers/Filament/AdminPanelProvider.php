@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Roles')
                     ->navigationIcon('heroicon-o-shield-check')
-                    ->navigationGroup(null)
+                    ->navigationGroup('Settings')
                     ->navigationSort(101),
             ])
             ->brandLogo(asset('images/crow-logo.png'))

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Filament\Resources;
+
+use UnitEnum;
 use Filament\Support\Icons\Heroicon;
 
 use BackedEnum;
@@ -28,6 +30,8 @@ use Filament\Actions\ViewAction;
 
 class EmployeeResource extends Resource
 {
+    protected static string|UnitEnum|null $navigationGroup = 'HR';
+    protected static ?int $navigationSort = 10;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
