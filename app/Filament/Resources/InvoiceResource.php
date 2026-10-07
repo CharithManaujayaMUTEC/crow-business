@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Filament\Resources;
+use UnitEnum;
 
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Models\Invoice;
