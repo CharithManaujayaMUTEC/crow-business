@@ -90,6 +90,11 @@ class Employee extends Model
         'system_account_enabled' => 'boolean',
     ];
 
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
     public function payrolls(): HasMany
     {
         return $this->hasMany(Payroll::class);
