@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 use UnitEnum;
 
 use App\Filament\Resources\ProductResource\Pages;
@@ -20,6 +23,9 @@ use Filament\Forms\Components\Toggle;
 
 class ProductResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
+
         protected static string|UnitEnum|null $navigationGroup = 'Products & Services';
     protected static ?int $navigationSort = 10;
 protected static ?string $model = Product::class;

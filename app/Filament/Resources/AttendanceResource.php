@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Models\Attendance;
@@ -20,6 +23,9 @@ use UnitEnum;
 
 class AttendanceResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
+
     protected static ?string $model = Attendance::class;
 
     protected static ?string $navigationLabel = 'Attendance';

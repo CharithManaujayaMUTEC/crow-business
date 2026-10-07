@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 use UnitEnum;
 
 use App\Filament\Resources\ServiceResource\Pages;
@@ -21,6 +24,9 @@ use Filament\Forms\Components\Select;
 
 class ServiceResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
+
         protected static string|UnitEnum|null $navigationGroup = 'Products & Services';
     protected static ?int $navigationSort = 20;
 protected static ?string $model = Service::class;

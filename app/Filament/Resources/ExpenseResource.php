@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 use UnitEnum;
 
 use App\Filament\Resources\ExpenseResource\Pages;
@@ -22,6 +25,9 @@ use Filament\Forms\Components\FileUpload;
 
 class ExpenseResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+
     protected static string|UnitEnum|null $navigationGroup = 'Finance';
     protected static ?int $navigationSort = 10;
     protected static ?string $model = Expense::class;

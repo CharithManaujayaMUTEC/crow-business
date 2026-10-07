@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Models\Customer;
@@ -18,6 +21,9 @@ use UnitEnum;
 
 class CustomerResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
     protected static ?string $model = Customer::class;
 
     protected static string|UnitEnum|null $navigationGroup = 'Customers';

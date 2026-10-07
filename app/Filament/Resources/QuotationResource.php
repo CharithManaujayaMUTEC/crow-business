@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 use UnitEnum;
 
 use App\Filament\Resources\QuotationResource\Pages;
@@ -30,6 +33,9 @@ use Filament\Tables\Table;
 
 class QuotationResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
+
     protected static string|UnitEnum|null $navigationGroup = 'Finance';
     protected static ?int $navigationSort = 50;
     protected static ?string $model = Quotation::class;

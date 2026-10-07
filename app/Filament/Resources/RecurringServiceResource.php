@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 use UnitEnum;
 
 use App\Filament\Resources\RecurringServiceResource\Pages;
@@ -21,6 +24,9 @@ use Filament\Forms\Components\Toggle;
 
 class RecurringServiceResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPath;
+
         protected static string|UnitEnum|null $navigationGroup = 'Products & Services';
     protected static ?int $navigationSort = 25;
 protected static ?string $model = RecurringService::class;

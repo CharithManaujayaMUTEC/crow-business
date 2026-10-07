@@ -19,12 +19,12 @@ use Filament\Tables\Table;
 class UserResource extends Resource
 {
 
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUser;
+
+
     protected static UnitEnum|string|null $navigationGroup = 'Settings';
     protected static ?string $model = User::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
-
-    protected static ?string $navigationLabel = 'Users';
+protected static ?string $navigationLabel = 'Users';
 
     protected static ?string $modelLabel = 'User';
 

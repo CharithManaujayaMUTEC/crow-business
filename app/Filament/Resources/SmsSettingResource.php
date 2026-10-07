@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 
 use UnitEnum;
 
@@ -20,6 +23,9 @@ use Filament\Forms\Components\TextInput;
 
 class SmsSettingResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+
 
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
     protected static ?string $model = SmsSetting::class;

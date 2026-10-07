@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Models\Employee;
@@ -25,6 +28,9 @@ use Filament\Actions\ViewAction;
 
 class EmployeeResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
+
     protected static ?string $model = Employee::class;
 
     protected static ?string $navigationLabel = 'Employees';

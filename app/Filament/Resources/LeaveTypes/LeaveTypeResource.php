@@ -16,11 +16,11 @@ use Filament\Tables\Table;
 
 class LeaveTypeResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
+
     protected static ?string $model = LeaveType::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-    protected static ?string $recordTitleAttribute = 'ilament\Forms\Components\Toggle;';
+protected static ?string $recordTitleAttribute = 'ilament\Forms\Components\Toggle;';
 
     public static function form(Schema $schema): Schema
     {

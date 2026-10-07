@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+use Filament\Support\Icons\Heroicon;
+
+use BackedEnum;
 
 use App\Filament\Resources\PayrollResource\Pages;
 use App\Models\Employee;
@@ -23,6 +26,9 @@ use UnitEnum;
 
 class PayrollResource extends Resource
 {
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+
     protected static ?string $model = Payroll::class;
 
     protected static string|UnitEnum|null $navigationGroup = 'Finance';
