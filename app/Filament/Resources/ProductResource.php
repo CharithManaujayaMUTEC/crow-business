@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Filament\Resources;
+use UnitEnum;
 
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
@@ -19,7 +20,9 @@ use Filament\Forms\Components\Toggle;
 
 class ProductResource extends Resource
 {
-    protected static ?string $model = Product::class;
+        protected static string|UnitEnum|null $navigationGroup = 'Products & Services';
+    protected static ?int $navigationSort = 10;
+protected static ?string $model = Product::class;
     protected static ?string $navigationLabel = 'Products';
     protected static ?string $pluralModelLabel = 'Products';
     protected static ?string $modelLabel = 'Product';

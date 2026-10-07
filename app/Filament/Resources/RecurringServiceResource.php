@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Filament\Resources;
+use UnitEnum;
 
 use App\Filament\Resources\RecurringServiceResource\Pages;
 use App\Models\RecurringService;
@@ -20,7 +21,9 @@ use Filament\Forms\Components\Toggle;
 
 class RecurringServiceResource extends Resource
 {
-    protected static ?string $model = RecurringService::class;
+        protected static string|UnitEnum|null $navigationGroup = 'Products & Services';
+    protected static ?int $navigationSort = 25;
+protected static ?string $model = RecurringService::class;
     protected static ?string $navigationLabel = 'Recurring Services';
     protected static ?string $pluralModelLabel = 'Recurring Services';
     protected static ?string $modelLabel = 'RecurringService';

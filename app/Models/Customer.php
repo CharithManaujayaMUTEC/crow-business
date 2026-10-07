@@ -14,4 +14,8 @@ class Customer extends Model
     public function invoices(): HasMany { return $this->hasMany(Invoice::class); }
     public function payments(): HasMany { return $this->hasMany(Payment::class); }
     public function recurringServices(): HasMany { return $this->hasMany(RecurringService::class); }
-}
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }}

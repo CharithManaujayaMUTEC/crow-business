@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Filament\Resources;
+use UnitEnum;
 
 use App\Filament\Resources\ServiceResource\Pages;
 use App\Models\Service;
@@ -20,7 +21,9 @@ use Filament\Forms\Components\Select;
 
 class ServiceResource extends Resource
 {
-    protected static ?string $model = Service::class;
+        protected static string|UnitEnum|null $navigationGroup = 'Products & Services';
+    protected static ?int $navigationSort = 20;
+protected static ?string $model = Service::class;
     protected static ?string $navigationLabel = 'Services';
     protected static ?string $pluralModelLabel = 'Services';
     protected static ?string $modelLabel = 'Service';
