@@ -90,6 +90,11 @@ class Employee extends Model
         'system_account_enabled' => 'boolean',
     ];
 
+    public function leaveRequests(): HasMany
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
@@ -150,3 +155,4 @@ class Employee extends Model
         return $this->preferred_name ?: $this->name;
     }
 }
+
