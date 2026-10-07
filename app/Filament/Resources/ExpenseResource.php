@@ -22,8 +22,6 @@ use Filament\Forms\Components\FileUpload;
 class ExpenseResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Finance';
-    protected static string|UnitEnum|null $navigationGroup = 'Finance';
-    protected static ?string $navigationGroup = 'Finance';
     protected static ?int $navigationSort = 10;
     protected static ?string $model = Expense::class;
     protected static ?string $navigationLabel = 'Expenses';
