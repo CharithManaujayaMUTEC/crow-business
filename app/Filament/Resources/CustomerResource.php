@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use UnitEnum;
-
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Models\Customer;
 use Filament\Actions\CreateAction;
@@ -21,34 +19,17 @@ use Filament\Forms\Components\Select;
 
 class CustomerResource extends Resource
 {
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
 
     protected static string|UnitEnum|null $navigationGroup = 'Customers';
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
 
-
-    protected static ?string $model = Customer::class;
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-
-
-    protected static ?string $navigationLabel = 'Customers';
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-
-
-    protected static ?string $pluralModelLabel = 'Customers';
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-    protected static string|UnitEnum|null $navigationGroup = 'Customers';
-
-
-    protected static ?string $modelLabel = 'Customer';
+protected static string|UnitEnum|null $navigationGroup = 'Customers';
+protected static ?string $model = Customer::class;
+protected static string|UnitEnum|null $navigationGroup = 'Customers';
+protected static ?string $navigationLabel = 'Customers';
+protected static string|UnitEnum|null $navigationGroup = 'Customers';
+protected static ?string $pluralModelLabel = 'Customers';
+protected static string|UnitEnum|null $navigationGroup = 'Customers';
+protected static ?string $modelLabel = 'Customer';
 
     public static function form(Schema $schema): Schema
     {
