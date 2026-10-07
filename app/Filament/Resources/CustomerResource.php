@@ -23,14 +23,30 @@ class CustomerResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Customers';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+
+
     protected static ?string $model = Customer::class;
     protected static string|UnitEnum|null $navigationGroup = 'Customers';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+
 
     protected static ?string $navigationLabel = 'Customers';
     protected static string|UnitEnum|null $navigationGroup = 'Customers';
 
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+
+
     protected static ?string $pluralModelLabel = 'Customers';
     protected static string|UnitEnum|null $navigationGroup = 'Customers';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+
 
     protected static ?string $modelLabel = 'Customer';
 
