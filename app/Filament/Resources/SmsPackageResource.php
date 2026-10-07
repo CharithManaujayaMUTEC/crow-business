@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use UnitEnum;
+
 use App\Filament\Resources\SmsPackageResource\Pages;
 use App\Models\SmsPackage;
 use Filament\Actions\CreateAction;
@@ -18,6 +20,8 @@ use Filament\Tables\Table;
 
 class SmsPackageResource extends Resource
 {
+
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
     protected static ?string $model = SmsPackage::class;
 
     protected static ?string $navigationLabel = 'SMS Packages';
@@ -127,3 +131,6 @@ class SmsPackageResource extends Resource
         ];
     }
 }
+
+
+

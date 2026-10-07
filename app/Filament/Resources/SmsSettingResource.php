@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use UnitEnum;
+
 use App\Filament\Resources\SmsSettingResource\Pages;
 use App\Models\SmsSetting;
 use Filament\Actions\CreateAction;
@@ -18,6 +20,8 @@ use Filament\Forms\Components\TextInput;
 
 class SmsSettingResource extends Resource
 {
+
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
     protected static ?string $model = SmsSetting::class;
     protected static ?string $navigationLabel = 'SMS Settings';
     protected static ?string $pluralModelLabel = 'SMS Settings';
@@ -67,3 +71,6 @@ TextColumn::make('country_code')
         ];
     }
 }
+
+
+

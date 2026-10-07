@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Users;
 
+use UnitEnum;
+
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -16,6 +18,8 @@ use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
+
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
@@ -52,6 +56,7 @@ class UserResource extends Resource
         ];
     }
 }
+
 
 
 

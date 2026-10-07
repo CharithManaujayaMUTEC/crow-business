@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use UnitEnum;
+
 use App\Filament\Resources\SmsLogResource\Pages;
 use App\Models\SmsLog;
 use Filament\Actions\CreateAction;
@@ -20,6 +22,8 @@ use Filament\Forms\Components\DateTimePicker;
 
 class SmsLogResource extends Resource
 {
+
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
     protected static ?string $model = SmsLog::class;
     protected static ?string $navigationLabel = 'SMS Logs';
     protected static ?string $pluralModelLabel = 'SMS Logs';
@@ -74,3 +78,6 @@ TextColumn::make('sent_at')->dateTime()
         ];
     }
 }
+
+
+

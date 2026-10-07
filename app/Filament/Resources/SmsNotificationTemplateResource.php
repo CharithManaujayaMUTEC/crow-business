@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use UnitEnum;
+
 use App\Filament\Resources\SmsNotificationTemplateResource\Pages;
 use App\Models\SmsNotificationTemplate;
 use Filament\Actions\CreateAction;
@@ -18,6 +20,8 @@ use Filament\Tables\Table;
 
 class SmsNotificationTemplateResource extends Resource
 {
+
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
     protected static ?string $model = SmsNotificationTemplate::class;
 
     protected static ?string $navigationLabel = 'SMS Templates';
@@ -129,3 +133,6 @@ class SmsNotificationTemplateResource extends Resource
         ];
     }
 }
+
+
+
