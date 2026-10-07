@@ -22,6 +22,7 @@ use UnitEnum;
 class PayrollResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Finance';
+    protected static string|UnitEnum|null $navigationGroup = 'Finance';
     protected static ?string $navigationGroup = 'Finance';
     protected static ?string $navigationGroup = 'Finance';
     protected static ?string $model = Payroll::class;
