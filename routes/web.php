@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PayslipController;
 use App\Http\Controllers\PdfController;
 
 Route::get('/', function () {
@@ -16,4 +17,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/pdf/payments/{payment}', [PdfController::class, 'payment'])
         ->name('pdf.payment');
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/payroll/{payroll}/payslip', [PayslipController::class, 'show'])
+        ->name('payroll.payslip');
 });
