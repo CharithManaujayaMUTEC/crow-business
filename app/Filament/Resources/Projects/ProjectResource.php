@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Projects;
 
+use UnitEnum;
+
 use App\Filament\Resources\Projects\Pages\CreateProject;
 use App\Filament\Resources\Projects\Pages\EditProject;
 use App\Filament\Resources\Projects\Pages\ListProjects;
@@ -16,6 +18,9 @@ use Filament\Tables\Table;
 
 class ProjectResource extends Resource
 {
+    protected static string|UnitEnum|null $navigationGroup = 'Customers';
+    protected static ?int $navigationSort = 20;
+
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBriefcase;
 

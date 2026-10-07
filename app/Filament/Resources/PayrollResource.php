@@ -26,14 +26,16 @@ use UnitEnum;
 
 class PayrollResource extends Resource
 {
+    protected static string|UnitEnum|null $navigationGroup = 'HR';
+    protected static ?int $navigationSort = 50;
+
+
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
     protected static ?string $model = Payroll::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Finance';
 
-    protected static ?int $navigationSort = 40;
 
     protected static ?string $navigationLabel = 'Payroll';
 
