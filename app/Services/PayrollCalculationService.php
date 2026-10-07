@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\CompanySetting;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -97,10 +98,15 @@ class PayrollCalculationService
         /*
          * EPF/ETF are calculated against gross salary.
          */
-        $epfEmployee = $grossSalary * 0.08;
-        $epfEmployer = $grossSalary * 0.12;
-        $etfEmployer = $grossSalary * 0.03;
+        $companySettings = CompanySetting::query()->first();
 
+        $epfEmployeeRate = (float) ($companySettings?->epf_employee_rate ?? 8.00);
+        $epfEmployerRate = (float) ($companySettings?->epf_employer_rate ?? 12.00);
+        $etfEmployerRate = (float) ($companySettings?->etf_employer_rate ?? 3.00);
+
+        $epfEmployee = $grossSalary * ($epfEmployeeRate / 100);
+        $epfEmployer = $grossSalary * ($epfEmployerRate / 100);
+        $etfEmployer = $grossSalary * ($etfEmployerRate / 100);
         /*
          * Standard employee deduction from profile +
          * manually supplied payroll deduction.

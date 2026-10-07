@@ -74,6 +74,41 @@ class CompanySettingResource extends Resource
                 ->columns([
                     'default' => 1,
                     'xl' => 2,
+
+                Section::make('Payroll Contribution Rates')
+                    ->description('Configure the company EPF and ETF contribution percentages used for payroll calculations.')
+                    ->schema([
+                        TextInput::make('epf_employee_rate')
+                            ->label('EPF - Employee Rate')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->step(0.01)
+                            ->suffix('%')
+                            ->default(8.00)
+                            ->required(),
+
+                        TextInput::make('epf_employer_rate')
+                            ->label('EPF - Employer Rate')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->step(0.01)
+                            ->suffix('%')
+                            ->default(12.00)
+                            ->required(),
+
+                        TextInput::make('etf_employer_rate')
+                            ->label('ETF - Employer Rate')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->step(0.01)
+                            ->suffix('%')
+                            ->default(3.00)
+                            ->required(),
+                    ])
+                    ->columns(3),
                 ]);
     }
 
