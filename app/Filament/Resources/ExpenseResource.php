@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Filament\Resources;
 
@@ -21,6 +21,8 @@ use Filament\Forms\Components\FileUpload;
 
 class ExpenseResource extends Resource
 {
+    protected static ?string $navigationGroup = 'Finance';
+    protected static ?int $navigationSort = 10;
     protected static ?string $model = Expense::class;
     protected static ?string $navigationLabel = 'Expenses';
     protected static ?string $pluralModelLabel = 'Expenses';
@@ -75,3 +77,4 @@ TextColumn::make('amount')->money('LKR')
         ];
     }
 }
+
