@@ -11,33 +11,29 @@ return new class extends Migration
         Schema::create('employee_tasks', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('assigned_to_employee_id')
+            $table->foreignId('employee_id')
                 ->constrained('employees')
                 ->cascadeOnDelete();
 
-            $table->foreignId('assigned_by_user_id')
+            $table->foreignId('created_by')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
 
             $table->string('title');
-
             $table->text('description')->nullable();
 
             $table->date('due_date')->nullable();
 
             $table->string('priority')->default('medium');
-
             $table->string('status')->default('pending');
-
-            $table->text('completion_notes')->nullable();
 
             $table->timestamp('completed_at')->nullable();
 
             $table->timestamps();
 
-            $table->index(['assigned_to_employee_id', 'status']);
-            $table->index(['assigned_by_user_id', 'status']);
+            $table->index(['employee_id', 'status']);
+            $table->index(['due_date']);
         });
     }
 

@@ -7,20 +7,23 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Models\Payroll;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class EmployeePortalController extends Controller
 {
-    private function employeeFor(Request $request): ?Employee
+    private function employee(Request $request): Employee
     {
-        return Employee::query()
+        $employee = Employee::query()
             ->where('user_id', $request->user()->id)
             ->first();
+
+        abort_unless($employee, 403, 'No employee profile is linked to this account.');
+
+        return $employee;
     }
 
     public function login(Request $request): JsonResponse
@@ -35,9 +38,9 @@ class EmployeePortalController extends Controller
             ->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            return response()->json([
+                'message' => 'Invalid email or password.',
+            ], 422);
         }
 
         $employee = Employee::query()
@@ -51,19 +54,18 @@ class EmployeePortalController extends Controller
         }
 
         if (
-            isset($employee->system_account_enabled)
-            && ! $employee->system_account_enabled
+            isset($employee->status)
+            && ! in_array(strtolower((string) $employee->status), ['active', 'employed'], true)
         ) {
             return response()->json([
-                'message' => 'Employee portal access is disabled for this account.',
+                'message' => 'This employee account is not active.',
             ], 403);
         }
 
-        $user->tokens()->delete();
-
-        $token = $user->createToken('desk-crow-lk')->plainTextToken;
+        $token = $user->createToken('crow-desk-web')->plainTextToken;
 
         return response()->json([
+            'message' => 'Login successful.',
             'token' => $token,
             'user' => $this->userPayload($user, $employee),
         ]);
@@ -71,7 +73,9 @@ class EmployeePortalController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()?->delete();
+        $request->user()
+            ->currentAccessToken()
+            ?->delete();
 
         return response()->json([
             'message' => 'Logged out successfully.',
@@ -80,30 +84,18 @@ class EmployeePortalController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        $employee = $this->employeeFor($request);
-
-        if (! $employee) {
-            return response()->json([
-                'message' => 'Employee profile not found.',
-            ], 403);
-        }
+        $employee = $this->employee($request);
 
         return response()->json([
-            'data' => $this->userPayload($request->user(), $employee),
+            'user' => $this->userPayload($request->user(), $employee),
         ]);
     }
 
     public function dashboard(Request $request): JsonResponse
     {
-        $employee = $this->employeeFor($request);
+        $employee = $this->employee($request);
 
-        if (! $employee) {
-            return response()->json([
-                'message' => 'Employee profile not found.',
-            ], 403);
-        }
-
-        $today = now()->toDateString();
+        $today = Carbon::today();
 
         $todayAttendance = Attendance::query()
             ->where('employee_id', $employee->id)
@@ -115,133 +107,152 @@ class EmployeePortalController extends Controller
             ->where('status', 'pending')
             ->count();
 
-        $tasks = \App\Models\EmployeeTask::query()
-            ->where('assigned_to_employee_id', $employee->id)
-            ->whereIn('status', ['pending', 'in_progress'])
+        $approvedLeaves = LeaveRequest::query()
+            ->where('employee_id', $employee->id)
+            ->where('status', 'approved')
             ->count();
 
-        $managerApprovals = 0;
+        $recentPayroll = Payroll::query()
+            ->where('employee_id', $employee->id)
+            ->latest('payment_date')
+            ->latest('id')
+            ->first();
 
-        if ($this->canManage($request)) {
-            $managerApprovals = LeaveRequest::query()
-                ->where('status', 'pending')
-                ->whereHas('employee', function ($q) use ($employee, $request) {
-                    if (! $request->user()->is_super_admin) {
-                        $q->where('reporting_manager_id', $employee->id);
-                    }
-                })
-                ->count();
-        }
+        $canManage = (bool) $request->user()->is_super_admin
+            || Employee::query()
+                ->where('reporting_manager_id', $employee->id)
+                ->exists();
 
         return response()->json([
-            'data' => [
-                'employee' => $this->userPayload($request->user(), $employee),
-                'today' => [
-                    'date' => $today,
-                    'attendance' => $todayAttendance,
-                ],
-                'pending_leaves' => $pendingLeaves,
-                'open_tasks' => $tasks,
-                'approval_requests' => $managerApprovals,
-                'can_manage' => $this->canManage($request),
+            'employee' => $this->employeePayload($employee),
+            'today' => [
+                'date' => $today->toDateString(),
+                'attendance' => $todayAttendance,
             ],
+            'leave_summary' => [
+                'pending' => $pendingLeaves,
+                'approved' => $approvedLeaves,
+            ],
+            'latest_payroll' => $recentPayroll,
+            'can_manage' => $canManage,
         ]);
     }
 
     public function attendance(Request $request): JsonResponse
     {
-        $employee = $this->employeeFor($request);
+        $employee = $this->employee($request);
 
         $query = Attendance::query()
             ->where('employee_id', $employee->id)
             ->orderByDesc('attendance_date');
 
-        if ($request->filled('month')) {
-            $date = Carbon::createFromFormat('Y-m', $request->string('month'));
+        if ($request->filled('from')) {
+            $query->whereDate('attendance_date', '>=', $request->date('from'));
+        }
 
-            $query
-                ->whereYear('attendance_date', $date->year)
-                ->whereMonth('attendance_date', $date->month);
+        if ($request->filled('to')) {
+            $query->whereDate('attendance_date', '<=', $request->date('to'));
         }
 
         return response()->json([
-            'data' => $query->paginate(31),
+            'data' => $query->paginate(
+                min((int) $request->input('per_page', 31), 100)
+            ),
         ]);
     }
 
     public function checkIn(Request $request): JsonResponse
     {
-        $employee = $this->employeeFor($request);
-        $today = now()->toDateString();
+        $employee = $this->employee($request);
+        $today = Carbon::today();
 
-        $attendance = Attendance::firstOrCreate(
+        $attendance = Attendance::query()->firstOrCreate(
             [
                 'employee_id' => $employee->id,
-                'attendance_date' => $today,
+                'attendance_date' => $today->toDateString(),
             ],
             [
                 'status' => 'present',
-                'late_minutes' => 0,
             ]
         );
 
         if ($attendance->check_in) {
             return response()->json([
                 'message' => 'You have already checked in today.',
-                'data' => $attendance,
+                'attendance' => $attendance,
             ], 422);
         }
 
-        $attendance->update([
-            'check_in' => now(),
-            'status' => 'present',
-        ]);
+        $now = Carbon::now();
+
+        $attendance->check_in = $now->format('H:i:s');
+        $attendance->status = $now->format('H:i:s') > '09:00:00'
+            ? 'late'
+            : 'present';
+
+        if ($now->format('H:i:s') > '09:00:00') {
+            $attendance->late_minutes = Carbon::createFromTimeString('09:00:00')
+                ->diffInMinutes($now);
+        }
+
+        $attendance->save();
 
         return response()->json([
             'message' => 'Check-in recorded successfully.',
-            'data' => $attendance->fresh(),
+            'attendance' => $attendance,
         ]);
     }
 
     public function checkOut(Request $request): JsonResponse
     {
-        $employee = $this->employeeFor($request);
-        $today = now()->toDateString();
+        $employee = $this->employee($request);
 
         $attendance = Attendance::query()
             ->where('employee_id', $employee->id)
-            ->whereDate('attendance_date', $today)
+            ->whereDate('attendance_date', Carbon::today())
             ->first();
 
-        if (! $attendance || ! $attendance->check_in) {
+        if (! $attendance) {
             return response()->json([
-                'message' => 'You must check in before checking out.',
+                'message' => 'You have not checked in today.',
+            ], 422);
+        }
+
+        if (! $attendance->check_in) {
+            return response()->json([
+                'message' => 'You have not checked in today.',
             ], 422);
         }
 
         if ($attendance->check_out) {
             return response()->json([
                 'message' => 'You have already checked out today.',
-                'data' => $attendance,
+                'attendance' => $attendance,
             ], 422);
         }
 
-        $checkIn = Carbon::parse($attendance->check_in);
-        $checkOut = now();
+        $now = Carbon::now();
 
-        $hours = round(
+        $attendance->check_out = $now->format('H:i:s');
+
+        $checkIn = Carbon::parse(
+            $attendance->attendance_date->format('Y-m-d') . ' ' . $attendance->check_in
+        );
+
+        $checkOut = Carbon::parse(
+            $attendance->attendance_date->format('Y-m-d') . ' ' . $attendance->check_out
+        );
+
+        $attendance->working_hours = round(
             $checkIn->diffInMinutes($checkOut) / 60,
             2
         );
 
-        $attendance->update([
-            'check_out' => $checkOut,
-            'working_hours' => $hours,
-        ]);
+        $attendance->save();
 
         return response()->json([
             'message' => 'Check-out recorded successfully.',
-            'data' => $attendance->fresh(),
+            'attendance' => $attendance,
         ]);
     }
 
@@ -258,188 +269,190 @@ class EmployeePortalController extends Controller
                     'allocation',
                     'allocation_period',
                     'is_paid',
+                    'description',
                 ]),
         ]);
     }
 
     public function leaves(Request $request): JsonResponse
     {
-        $employee = $this->employeeFor($request);
+        $employee = $this->employee($request);
 
         return response()->json([
             'data' => LeaveRequest::query()
-                ->with('leaveType:id,name,code,allocation,allocation_period,is_paid')
+                ->with('leaveType')
                 ->where('employee_id', $employee->id)
-                ->latest()
-                ->get(),
+                ->latest('from_date')
+                ->paginate(
+                    min((int) $request->input('per_page', 20), 100)
+                ),
         ]);
     }
 
-    public function applyLeave(Request $request): JsonResponse
+    public function createLeave(Request $request): JsonResponse
     {
-        $employee = $this->employeeFor($request);
+        $employee = $this->employee($request);
 
-        $validated = $request->validate([
-            'leave_type_id' => [
-                'required',
-                'integer',
-                'exists:leave_types,id',
-            ],
+        $data = $request->validate([
+            'leave_type_id' => ['required', 'exists:leave_types,id'],
             'from_date' => ['required', 'date'],
             'to_date' => ['required', 'date', 'after_or_equal:from_date'],
             'reason' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $from = Carbon::parse($validated['from_date'])->startOfDay();
-        $to = Carbon::parse($validated['to_date'])->startOfDay();
+        $leaveType = LeaveType::query()
+            ->where('id', $data['leave_type_id'])
+            ->where('is_active', true)
+            ->first();
 
-        $days = $from->diffInDays($to) + 1;
-
-        $leave = LeaveRequest::create([
-            'employee_id' => $employee->id,
-            'leave_type_id' => $validated['leave_type_id'],
-            'from_date' => $from->toDateString(),
-            'to_date' => $to->toDateString(),
-            'days' => $days,
-            'reason' => $validated['reason'] ?? null,
-            'status' => 'pending',
-        ]);
-
-        return response()->json([
-            'message' => 'Leave request submitted successfully.',
-            'data' => $leave->load('leaveType'),
-        ], 201);
-    }
-
-    public function cancelLeave(Request $request, LeaveRequest $leaveRequest): JsonResponse
-    {
-        $employee = $this->employeeFor($request);
-
-        if ((int) $leaveRequest->employee_id !== (int) $employee->id) {
+        if (! $leaveType) {
             return response()->json([
-                'message' => 'Not authorized.',
-            ], 403);
-        }
-
-        if ($leaveRequest->status !== 'pending') {
-            return response()->json([
-                'message' => 'Only pending leave requests can be cancelled.',
+                'message' => 'Selected leave type is not active.',
             ], 422);
         }
 
-        $leaveRequest->update([
-            'status' => 'cancelled',
-        ]);
+        $from = Carbon::parse($data['from_date']);
+        $to = Carbon::parse($data['to_date']);
+
+        $days = $from->diffInDays($to) + 1;
+
+        $leave = new LeaveRequest();
+        $leave->employee_id = $employee->id;
+        $leave->leave_type_id = $leaveType->id;
+        $leave->from_date = $from->toDateString();
+        $leave->to_date = $to->toDateString();
+        $leave->days = $days;
+        $leave->reason = $data['reason'] ?? null;
+        $leave->status = 'pending';
+        $leave->save();
+
+        $leave->load('leaveType');
 
         return response()->json([
-            'message' => 'Leave request cancelled.',
-            'data' => $leaveRequest->fresh()->load('leaveType'),
-        ]);
+            'message' => 'Leave request submitted successfully.',
+            'data' => $leave,
+        ], 201);
     }
 
-    public function approvalRequests(Request $request): JsonResponse
-    {
-        $employee = $this->employeeFor($request);
+    public function cancelLeave(
+        Request $request,
+        LeaveRequest $leaveRequest
+    ): JsonResponse {
+        $employee = $this->employee($request);
 
-        if (! $this->canManage($request)) {
+        if ($leaveRequest->employee_id !== $employee->id) {
             return response()->json([
-                'message' => 'Not authorized.',
+                'message' => 'You cannot cancel this leave request.',
             ], 403);
         }
 
+        if (! in_array($leaveRequest->status, ['pending', 'approved'], true)) {
+            return response()->json([
+                'message' => 'This leave request cannot be cancelled.',
+            ], 422);
+        }
+
+        $leaveRequest->status = 'cancelled';
+        $leaveRequest->save();
+
+        return response()->json([
+            'message' => 'Leave request cancelled successfully.',
+            'data' => $leaveRequest,
+        ]);
+    }
+
+    public function approvals(Request $request): JsonResponse
+    {
+        $employee = $this->employee($request);
+
         $query = LeaveRequest::query()
-            ->with([
-                'employee:id,name,preferred_name,employee_number,reporting_manager_id',
-                'leaveType:id,name,code',
-            ])
-            ->where('status', 'pending')
-            ->latest();
+            ->with(['employee', 'leaveType'])
+            ->where('status', 'pending');
 
         if (! $request->user()->is_super_admin) {
-            $query->whereHas('employee', function ($q) use ($employee) {
-                $q->where('reporting_manager_id', $employee->id);
+            $query->whereHas('employee', function ($employeeQuery) use ($employee) {
+                $employeeQuery->where('reporting_manager_id', $employee->id);
             });
         }
 
         return response()->json([
-            'data' => $query->get(),
+            'data' => $query
+                ->latest()
+                ->paginate(
+                    min((int) $request->input('per_page', 20), 100)
+                ),
         ]);
     }
 
-    public function approveLeave(
+    public function updateApproval(
         Request $request,
         LeaveRequest $leaveRequest
     ): JsonResponse {
-        $employee = $this->employeeFor($request);
+        $employee = $this->employee($request);
 
-        if (! $this->canManage($request)) {
+        $canApprove = $request->user()->is_super_admin
+            || $leaveRequest->employee?->reporting_manager_id === $employee->id;
+
+        if (! $canApprove) {
             return response()->json([
-                'message' => 'Not authorized.',
+                'message' => 'You are not authorized to approve this request.',
             ], 403);
         }
 
-        $targetEmployee = $leaveRequest->employee;
-
-        if (
-            ! $request->user()->is_super_admin
-            && (int) $targetEmployee->reporting_manager_id !== (int) $employee->id
-        ) {
-            return response()->json([
-                'message' => 'You can only approve leave for your direct reports.',
-            ], 403);
-        }
-
-        $validated = $request->validate([
-            'status' => [
-                'required',
-                Rule::in(['approved', 'rejected']),
-            ],
+        $data = $request->validate([
+            'status' => ['required', 'in:approved,rejected'],
             'approval_notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $leaveRequest->update([
-            'status' => $validated['status'],
-            'approval_notes' => $validated['approval_notes'] ?? null,
-        ]);
+        if ($leaveRequest->status !== 'pending') {
+            return response()->json([
+                'message' => 'This leave request has already been processed.',
+            ], 422);
+        }
+
+        $leaveRequest->status = $data['status'];
+        $leaveRequest->approval_notes = $data['approval_notes'] ?? null;
+        $leaveRequest->save();
 
         return response()->json([
             'message' => 'Leave request updated successfully.',
-            'data' => $leaveRequest->fresh()->load([
-                'employee',
-                'leaveType',
-            ]),
+            'data' => $leaveRequest->load(['employee', 'leaveType']),
         ]);
-    }
-
-    private function canManage(Request $request): bool
-    {
-        if ((bool) $request->user()->is_super_admin) {
-            return true;
-        }
-
-        $employee = $this->employeeFor($request);
-
-        return $employee !== null
-            && Employee::query()
-                ->where('reporting_manager_id', $employee->id)
-                ->exists();
     }
 
     private function userPayload($user, Employee $employee): array
     {
         return [
             'id' => $user->id,
-            'name' => $employee->preferred_name ?: $employee->name,
-            'full_name' => $employee->name,
+            'name' => $user->name,
             'email' => $user->email,
-            'employee_id' => $employee->id,
-            'employee_number' => $employee->employee_number,
-            'designation' => $employee->designation,
-            'department' => $employee->department,
-            'phone' => $employee->phone,
-            'profile_photo' => $employee->profile_photo,
-            'join_date' => $employee->join_date,
+            'mobile' => $user->mobile ?? null,
             'is_super_admin' => (bool) $user->is_super_admin,
+            'employee' => $this->employeePayload($employee),
+        ];
+    }
+
+    private function employeePayload(Employee $employee): array
+    {
+        return [
+            'id' => $employee->id,
+            'employee_no' => $employee->employee_no,
+            'name' => $employee->name,
+            'preferred_name' => $employee->preferred_name,
+            'profile_photo' => $employee->profile_photo,
+            'email' => $employee->email,
+            'personal_email' => $employee->personal_email,
+            'phone' => $employee->phone,
+            'department' => $employee->department,
+            'position' => $employee->position,
+            'designation' => $employee->designation,
+            'job_title' => $employee->job_title,
+            'status' => $employee->status,
+            'employment_type' => $employee->employment_type,
+            'work_location' => $employee->work_location,
+            'work_mode' => $employee->work_mode,
+            'join_date' => $employee->join_date,
+            'basic_salary' => $employee->basic_salary,
         ];
     }
 }

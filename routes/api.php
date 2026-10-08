@@ -1,96 +1,122 @@
 ﻿<?php
 
 use App\Http\Controllers\Api\EmployeePortalController;
+use App\Http\Controllers\Api\SmsPackageController;
 use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Public API
+|--------------------------------------------------------------------------
+*/
+
 Route::prefix('v1')->group(function () {
 
-    Route::post('/auth/login', [
-        EmployeePortalController::class,
-        'login',
-    ]);
+    // Existing SMS API
+    Route::get('/sms-packages', [SmsPackageController::class, 'index']);
+
+    // Crow Desk authentication
+    Route::post('/auth/login', [EmployeePortalController::class, 'login']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authenticated Crow Desk API
+    |--------------------------------------------------------------------------
+    */
 
     Route::middleware('auth:sanctum')->group(function () {
 
-        Route::post('/auth/logout', [
-            EmployeePortalController::class,
-            'logout',
-        ]);
+        Route::post('/auth/logout', [EmployeePortalController::class, 'logout']);
 
-        Route::get('/me', [
-            EmployeePortalController::class,
-            'me',
-        ]);
+        Route::get('/me', [EmployeePortalController::class, 'me']);
 
-        Route::get('/dashboard', [
-            EmployeePortalController::class,
-            'dashboard',
-        ]);
+        Route::get('/dashboard', [EmployeePortalController::class, 'dashboard']);
 
-        Route::get('/attendance', [
-            EmployeePortalController::class,
-            'attendance',
-        ]);
+        /*
+        |--------------------------------------------------------------------------
+        | Attendance
+        |--------------------------------------------------------------------------
+        */
 
-        Route::post('/attendance/check-in', [
-            EmployeePortalController::class,
-            'checkIn',
-        ]);
+        Route::get('/attendance', [EmployeePortalController::class, 'attendance']);
 
-        Route::post('/attendance/check-out', [
-            EmployeePortalController::class,
-            'checkOut',
-        ]);
+        Route::post(
+            '/attendance/check-in',
+            [EmployeePortalController::class, 'checkIn']
+        );
 
-        Route::get('/leave-types', [
-            EmployeePortalController::class,
-            'leaveTypes',
-        ]);
+        Route::post(
+            '/attendance/check-out',
+            [EmployeePortalController::class, 'checkOut']
+        );
 
-        Route::get('/leaves', [
-            EmployeePortalController::class,
-            'leaves',
-        ]);
+        /*
+        |--------------------------------------------------------------------------
+        | Leave Management
+        |--------------------------------------------------------------------------
+        */
 
-        Route::post('/leaves', [
-            EmployeePortalController::class,
-            'applyLeave',
-        ]);
+        Route::get(
+            '/leave-types',
+            [EmployeePortalController::class, 'leaveTypes']
+        );
 
-        Route::post('/leaves/{leaveRequest}/cancel', [
-            EmployeePortalController::class,
-            'cancelLeave',
-        ]);
+        Route::get(
+            '/leaves',
+            [EmployeePortalController::class, 'leaves']
+        );
 
-        Route::get('/leave-approvals', [
-            EmployeePortalController::class,
-            'approvalRequests',
-        ]);
+        Route::post(
+            '/leaves',
+            [EmployeePortalController::class, 'createLeave']
+        );
 
-        Route::patch('/leave-approvals/{leaveRequest}', [
-            EmployeePortalController::class,
-            'approveLeave',
-        ]);
+        Route::post(
+            '/leaves/{leaveRequest}/cancel',
+            [EmployeePortalController::class, 'cancelLeave']
+        );
 
-        Route::get('/tasks', [
-            TaskController::class,
-            'index',
-        ]);
+        /*
+        |--------------------------------------------------------------------------
+        | Leave Approvals
+        |--------------------------------------------------------------------------
+        */
 
-        Route::post('/tasks', [
-            TaskController::class,
-            'store',
-        ]);
+        Route::get(
+            '/leave-approvals',
+            [EmployeePortalController::class, 'approvals']
+        );
 
-        Route::patch('/tasks/{task}', [
-            TaskController::class,
-            'update',
-        ]);
+        Route::patch(
+            '/leave-approvals/{leaveRequest}',
+            [EmployeePortalController::class, 'updateApproval']
+        );
 
-        Route::get('/task-employees', [
-            TaskController::class,
-            'employees',
-        ]);
+        /*
+        |--------------------------------------------------------------------------
+        | Employee Tasks
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/tasks',
+            [TaskController::class, 'index']
+        );
+
+        Route::post(
+            '/tasks',
+            [TaskController::class, 'store']
+        );
+
+        Route::patch(
+            '/tasks/{task}',
+            [TaskController::class, 'update']
+        );
+
+        Route::get(
+            '/task-employees',
+            [TaskController::class, 'employees']
+        );
     });
 });

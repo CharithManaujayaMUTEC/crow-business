@@ -8,14 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class EmployeeTask extends Model
 {
     protected $fillable = [
-        'assigned_to_employee_id',
-        'assigned_by_user_id',
+        'employee_id',
+        'created_by',
         'title',
         'description',
         'due_date',
         'priority',
         'status',
-        'completion_notes',
         'completed_at',
     ];
 
@@ -24,13 +23,13 @@ class EmployeeTask extends Model
         'completed_at' => 'datetime',
     ];
 
-    public function assignedTo(): BelongsTo
+    public function employee(): BelongsTo
     {
-        return $this->belongsTo(Employee::class, 'assigned_to_employee_id');
+        return $this->belongsTo(Employee::class);
     }
 
-    public function assignedBy(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'assigned_by_user_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

@@ -7,199 +7,138 @@ use App\Models\Employee;
 use App\Models\EmployeeTask;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
-    private function employeeFor(Request $request): ?Employee
+    private function employee(Request $request): Employee
     {
-        return Employee::query()
+        $employee = Employee::query()
             ->where('user_id', $request->user()->id)
             ->first();
-    }
 
-    private function canManage(Request $request): bool
-    {
-        if ((bool) $request->user()->is_super_admin) {
-            return true;
-        }
+        abort_unless($employee, 403, 'No employee profile is linked to this account.');
 
-        $employee = $this->employeeFor($request);
-
-        return $employee !== null
-            && Employee::query()
-                ->where('reporting_manager_id', $employee->id)
-                ->exists();
+        return $employee;
     }
 
     public function index(Request $request): JsonResponse
     {
-        $employee = $this->employeeFor($request);
-
-        if (! $employee) {
-            return response()->json([
-                'message' => 'No employee profile is linked to this account.',
-            ], 403);
-        }
+        $employee = $this->employee($request);
 
         $query = EmployeeTask::query()
-            ->with([
-                'assignedTo:id,name,preferred_name,employee_number',
-                'assignedBy:id,name',
-            ])
+            ->with('employee')
+            ->where('employee_id', $employee->id)
             ->latest();
 
-        if ($this->canManage($request)) {
-            $query->where(function ($q) use ($employee) {
-                $q->where('assigned_to_employee_id', $employee->id)
-                    ->orWhere('assigned_by_user_id', $request->user()->id);
-            });
-        } else {
-            $query->where('assigned_to_employee_id', $employee->id);
-        }
-
         return response()->json([
-            'data' => $query->get(),
-            'can_manage' => $this->canManage($request),
+            'data' => $query->paginate(
+                min((int) $request->input('per_page', 20), 100)
+            ),
         ]);
     }
 
     public function store(Request $request): JsonResponse
     {
-        if (! $this->canManage($request)) {
-            return response()->json([
-                'message' => 'You are not authorized to assign tasks.',
-            ], 403);
-        }
+        $manager = $this->employee($request);
 
-        $employee = $this->employeeFor($request);
-
-        $validated = $request->validate([
-            'assigned_to_employee_id' => [
-                'required',
-                'integer',
-                'exists:employees,id',
-            ],
+        $data = $request->validate([
+            'employee_id' => ['required', 'exists:employees,id'],
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:5000'],
             'due_date' => ['nullable', 'date'],
-            'priority' => [
-                'required',
-                Rule::in(['low', 'medium', 'high', 'urgent']),
-            ],
+            'priority' => ['required', 'in:low,medium,high,urgent'],
         ]);
 
-        $target = Employee::findOrFail($validated['assigned_to_employee_id']);
+        $targetEmployee = Employee::query()->findOrFail($data['employee_id']);
 
-        if (
-            ! $request->user()->is_super_admin
-            && (int) $target->reporting_manager_id !== (int) $employee->id
-        ) {
+        $canManage = $request->user()->is_super_admin
+            || $targetEmployee->reporting_manager_id === $manager->id;
+
+        if (! $canManage) {
             return response()->json([
                 'message' => 'You can only assign tasks to your direct reports.',
             ], 403);
         }
 
         $task = EmployeeTask::create([
-            ...$validated,
-            'assigned_by_user_id' => $request->user()->id,
+            'employee_id' => $targetEmployee->id,
+            'created_by' => $request->user()->id,
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'due_date' => $data['due_date'] ?? null,
+            'priority' => $data['priority'],
             'status' => 'pending',
         ]);
 
         return response()->json([
-            'message' => 'Task assigned successfully.',
-            'data' => $task->load([
-                'assignedTo:id,name,preferred_name,employee_number',
-                'assignedBy:id,name',
-            ]),
+            'message' => 'Task created successfully.',
+            'data' => $task->load('employee'),
         ], 201);
     }
 
-    public function update(Request $request, EmployeeTask $task): JsonResponse
-    {
-        $employee = $this->employeeFor($request);
+    public function update(
+        Request $request,
+        EmployeeTask $task
+    ): JsonResponse {
+        $employee = $this->employee($request);
 
-        if (! $employee) {
-            return response()->json([
-                'message' => 'Employee profile not found.',
-            ], 403);
-        }
+        $canManage = $request->user()->is_super_admin
+            || $task->employee?->reporting_manager_id === $employee->id;
 
-        $isOwner = (int) $task->assigned_to_employee_id === (int) $employee->id;
+        $isOwner = $task->employee_id === $employee->id;
 
-        if (! $isOwner && ! $this->canManage($request)) {
+        if (! $canManage && ! $isOwner) {
             return response()->json([
                 'message' => 'You are not authorized to update this task.',
             ], 403);
         }
 
-        $validated = $request->validate([
-            'status' => [
-                'sometimes',
-                Rule::in(['pending', 'in_progress', 'completed', 'cancelled']),
-            ],
-            'completion_notes' => ['nullable', 'string'],
+        $data = $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'due_date' => ['nullable', 'date'],
-            'priority' => [
-                'sometimes',
-                Rule::in(['low', 'medium', 'high', 'urgent']),
-            ],
+            'description' => ['sometimes', 'nullable', 'string', 'max:5000'],
+            'due_date' => ['sometimes', 'nullable', 'date'],
+            'priority' => ['sometimes', 'in:low,medium,high,urgent'],
+            'status' => ['sometimes', 'in:pending,in_progress,completed,cancelled'],
         ]);
 
-        if (
-            isset($validated['status'])
-            && $validated['status'] === 'completed'
-        ) {
-            $validated['completed_at'] = now();
+        if (array_key_exists('status', $data)) {
+            if ($data['status'] === 'completed') {
+                $data['completed_at'] = now();
+            } else {
+                $data['completed_at'] = null;
+            }
         }
 
-        if (
-            isset($validated['status'])
-            && $validated['status'] !== 'completed'
-        ) {
-            $validated['completed_at'] = null;
-        }
-
-        $task->update($validated);
+        $task->update($data);
 
         return response()->json([
             'message' => 'Task updated successfully.',
-            'data' => $task->fresh()->load([
-                'assignedTo:id,name,preferred_name,employee_number',
-                'assignedBy:id,name',
-            ]),
+            'data' => $task->fresh()->load('employee'),
         ]);
     }
 
     public function employees(Request $request): JsonResponse
     {
-        if (! $this->canManage($request)) {
-            return response()->json([
-                'message' => 'Not authorized.',
-            ], 403);
-        }
-
-        $employee = $this->employeeFor($request);
+        $manager = $this->employee($request);
 
         $query = Employee::query()
-            ->where('employment_status', 'active')
-            ->select([
-                'id',
-                'employee_number',
-                'name',
-                'preferred_name',
-                'reporting_manager_id',
-            ])
+            ->where('status', 'active')
             ->orderBy('name');
 
         if (! $request->user()->is_super_admin) {
-            $query->where('reporting_manager_id', $employee->id);
+            $query->where('reporting_manager_id', $manager->id);
         }
 
         return response()->json([
-            'data' => $query->get(),
+            'data' => $query->get([
+                'id',
+                'employee_no',
+                'name',
+                'preferred_name',
+                'department',
+                'position',
+                'designation',
+            ]),
         ]);
     }
 }

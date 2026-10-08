@@ -9,11 +9,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
+    'allowed_origins' => array_values(array_filter([
+        env('CORS_ALLOWED_ORIGIN', 'https://desk.crow.lk'),
         'https://desk.crow.lk',
         'http://localhost:3000',
         'http://127.0.0.1:3000',
-    ],
+    ])),
 
     'allowed_origins_patterns' => [],
 
