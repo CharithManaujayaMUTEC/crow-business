@@ -11,7 +11,7 @@ return [
 
     'allowed_origins' => [
         'https://desk.crow.lk',
-        'https://darkcyan-meerkat-712653.hostingersite.com',
+        'https://sienna-capybara-289498.hostingersite.com',
         'http://localhost:3000',
         'http://127.0.0.1:3000',
     ],
