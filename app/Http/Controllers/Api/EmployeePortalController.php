@@ -202,49 +202,50 @@ class EmployeePortalController extends Controller
             'attendance' => $attendance,
         ]);
     }
-
+    
     public function checkOut(Request $request): JsonResponse
     {
         $employee = $this->employee($request);
+        $today = Carbon::today();
 
         $attendance = Attendance::query()
             ->where('employee_id', $employee->id)
-            ->whereDate('attendance_date', Carbon::today())
+            ->whereDate('attendance_date', $today)
             ->first();
 
-        if (! $attendance) {
+        if (! $attendance || ! $attendance->getRawOriginal('check_in')) {
             return response()->json([
                 'message' => 'You have not checked in today.',
             ], 422);
         }
 
-        if (! $attendance->check_in) {
-            return response()->json([
-                'message' => 'You have not checked in today.',
-            ], 422);
-        }
-
-        if ($attendance->check_out) {
+        if ($attendance->getRawOriginal('check_out')) {
             return response()->json([
                 'message' => 'You have already checked out today.',
                 'attendance' => $attendance,
             ], 422);
         }
 
-        $now = Carbon::now();
+        // Read the original database values to avoid datetime-cast issues.
+        $attendanceDate = Carbon::parse(
+            $attendance->getRawOriginal('attendance_date')
+        )->toDateString();
 
-        $attendance->check_out = $now->format('H:i:s');
+        $checkInTime = $attendance->getRawOriginal('check_in');
+        $checkOutTime = Carbon::now()->format('H:i:s');
 
         $checkIn = Carbon::parse(
-            $attendance->attendance_date->format('Y-m-d') . ' ' . $attendance->check_in
+            $attendanceDate . ' ' . $checkInTime
         );
 
         $checkOut = Carbon::parse(
-            $attendance->attendance_date->format('Y-m-d') . ' ' . $attendance->check_out
+            $attendanceDate . ' ' . $checkOutTime
         );
 
+        $attendance->check_out = $checkOutTime;
+
         $attendance->working_hours = round(
-            $checkIn->diffInMinutes($checkOut) / 60,
+            max(0, $checkIn->diffInMinutes($checkOut)) / 60,
             2
         );
 
@@ -252,7 +253,7 @@ class EmployeePortalController extends Controller
 
         return response()->json([
             'message' => 'Check-out recorded successfully.',
-            'attendance' => $attendance,
+            'attendance' => $attendance->fresh(),
         ]);
     }
 
