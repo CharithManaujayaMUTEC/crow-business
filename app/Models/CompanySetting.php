@@ -19,9 +19,11 @@ class CompanySetting extends Model
         'epf_employee_rate',
         'epf_employer_rate',
         'etf_employer_rate',
+        'development_hourly_rate',
     ];
 
     protected $casts = [
+        'development_hourly_rate' => 'decimal:2',
         'epf_employee_rate' => 'decimal:2',
         'epf_employer_rate' => 'decimal:2',
         'etf_employer_rate' => 'decimal:2',

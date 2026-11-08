@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
@@ -21,6 +22,8 @@ class Project extends Model
         'progress',
         'status',
         'notes',
+        'git_repository_url',
+        'github_repository_id',
     ];
 
     protected function casts(): array
@@ -37,5 +40,16 @@ class Project extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function githubRepository(): BelongsTo
+    {
+        return $this->belongsTo(GithubRepository::class);
+    }
+
+    /** Commits of the linked repository (matched on the repository id). */
+    public function commits(): HasMany
+    {
+        return $this->hasMany(GithubCommit::class, 'github_repository_id', 'github_repository_id');
     }
 }

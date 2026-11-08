@@ -71,6 +71,22 @@ class CompanySettingResource extends Resource
                 ])
                 ->columns(2),
 
+            Section::make('Development Costs')
+                ->description(
+                    'Hourly development rate used to calculate project development cost from the hours set on each Git commit.'
+                )
+                ->schema([
+                    TextInput::make('development_hourly_rate')
+                        ->label('Development Hourly Rate')
+                        ->numeric()
+                        ->minValue(0)
+                        ->step(0.01)
+                        ->prefix('LKR')
+                        ->default(0)
+                        ->required(),
+                ])
+                ->columns(2),
+
             Section::make('Payroll Contribution Rates')
                 ->description(
                     'Configure the company EPF and ETF contribution percentages used for payroll calculations.'

@@ -43,7 +43,9 @@ class ProjectResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            RelationManagers\CommitsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

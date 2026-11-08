@@ -10,10 +10,10 @@ class GithubCommit extends Model
     protected $fillable = [
         'github_repository_id', 'sha', 'message', 'author_name', 'author_email',
         'author_login', 'author_avatar', 'committer_name', 'committer_login',
-        'url', 'committed_at',
+        'url', 'committed_at', 'hours',
     ];
 
-    protected $casts = ['committed_at' => 'datetime'];
+    protected $casts = ['committed_at' => 'datetime', 'hours' => 'decimal:2'];
 
     public function repository(): BelongsTo
     {

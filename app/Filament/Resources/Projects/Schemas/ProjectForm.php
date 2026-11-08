@@ -52,6 +52,20 @@ class ProjectForm
                     ->default(0)
                     ->required(),
 
+                TextInput::make('git_repository_url')
+                    ->label('Git Repository URL')
+                    ->placeholder('https://github.com/your-org/repository')
+                    ->helperText('Must be a repository in the organization configured under GitHub Settings. Commits are imported when you save; set hours per commit in the Commits tab below.')
+                    ->rules([
+                        fn () => function (string $attribute, $value, \Closure $fail) {
+                            if (filled($value) && ! \App\Services\GitHubService::parseRepo($value)) {
+                                $fail('Enter a GitHub repository URL like https://github.com/org/repo.');
+                            }
+                        },
+                    ])
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+
                 DatePicker::make('start_date')
                     ->label('Start Date'),
 

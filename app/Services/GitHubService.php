@@ -48,6 +48,62 @@ class GitHubService
         );
     }
 
+    /** Turn "https://github.com/org/repo(.git)", "git@github.com:org/repo.git" or "org/repo" into "org/repo". */
+    public static function parseRepo(?string $input): ?string
+    {
+        $input = trim((string) $input);
+
+        if (preg_match('#github\.com[/:]([\w.-]+)/([\w.-]+)#i', $input, $m)
+            || preg_match('#^([\w.-]+)/([\w.-]+)$#', $input, $m)) {
+            return $m[1] . '/' . preg_replace('/\.git$/i', '', $m[2]);
+        }
+
+        return null;
+    }
+
+    /** Fetch a single repository from GitHub and store it (tracked). */
+    public function importRepository(string $fullName): GithubRepository
+    {
+        $repo = $this->client()->get("/repos/{$fullName}")->throw()->json();
+
+        $model = GithubRepository::firstOrNew(['github_id' => $repo['id']]);
+        $model->fill([
+            'name' => $repo['name'],
+            'full_name' => $repo['full_name'],
+            'default_branch' => $repo['default_branch'] ?? null,
+            'html_url' => $repo['html_url'] ?? null,
+            'description' => $repo['description'] ?? null,
+            'is_private' => (bool) ($repo['private'] ?? false),
+            'is_archived' => (bool) ($repo['archived'] ?? false),
+        ]);
+        $model->save();
+
+        return $model;
+    }
+
+    /**
+     * Link a project to the repository in its git_repository_url and pull its commits.
+     * Returns [commits stored, errors[]].
+     */
+    public function linkProject(\App\Models\Project $project): array
+    {
+        $fullName = self::parseRepo($project->git_repository_url);
+
+        if (! $fullName) {
+            $project->update(['github_repository_id' => null]);
+
+            return [0, []];
+        }
+
+        $repo = $this->importRepository($fullName);
+        $repo->update(['is_tracked' => true]);
+        $project->update(['github_repository_id' => $repo->id]);
+
+        [, $stored, $errors] = $this->syncCommits($repo);
+
+        return [$stored, $errors];
+    }
+
     /** Import/refresh the organization's repositories. Returns the number processed. */
     public function syncRepositories(): int
     {
