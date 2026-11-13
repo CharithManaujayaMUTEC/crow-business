@@ -21,6 +21,39 @@
             }
         }
     }
+    $darkLetterhead = false;
+
+    if ($letterheadData && function_exists('imagecreatefromstring')) {
+        $img = @imagecreatefromstring(base64_decode(substr($letterheadData, strpos($letterheadData, ',') + 1)));
+
+        if ($img) {
+            $w = imagesx($img);
+            $h = imagesy($img);
+            $sum = 0;
+            $n = 0;
+
+            for ($x = 1; $x <= 8; $x++) {
+                for ($y = 1; $y <= 8; $y++) {
+                    $c = imagecolorat($img, (int) ($w * $x / 9), (int) ($h * $y / 9));
+                    $opacity = (127 - (($c >> 24) & 127)) / 127;
+                    $lum = 0.299 * (($c >> 16) & 255) + 0.587 * (($c >> 8) & 255) + 0.114 * ($c & 255);
+                    $sum += $lum * $opacity + 255 * (1 - $opacity);
+                    $n++;
+                }
+            }
+
+            $darkLetterhead = ($sum / $n) < 128;
+            imagedestroy($img);
+        }
+    }
+
+    $fg = $darkLetterhead ? '#ffffff' : '#1a1a1a';
+    $muted = $darkLetterhead ? '#dddddd' : '#444444';
+    $line = $darkLetterhead ? '#777777' : '#cccccc';
+    $lineSoft = $darkLetterhead ? '#555555' : '#cccccc';
+    $boxBg = $darkLetterhead ? '#111111' : '#f7f7f7';
+    $thBg = $darkLetterhead ? '#151515' : '#f1f1f1';
+    $accent = $darkLetterhead ? '#f5a623' : '#e8890c';
 @endphp
 
 <!doctype html>
@@ -41,7 +74,7 @@ body {
     margin: 0;
     font-family: DejaVu Sans, Arial, sans-serif;
     font-size: 10px;
-    color: #1a1a1a;
+    color: {{ $fg }};
     
 }
 
@@ -81,17 +114,17 @@ body {
 h1 {
     margin: 0 0 5px;
     font-size: 22px;
-    color: #1a1a1a;
+    color: {{ $fg }};
 }
 
 h2 {
     margin: 16px 0 7px;
     font-size: 13px;
-    color: #e8890c;
+    color: {{ $accent }};
 }
 
 .muted {
-    color: #444444;
+    color: {{ $muted }};
 }
 
 .right {
@@ -108,18 +141,18 @@ h2 {
 .document-table th,
 .document-table td {
     padding: 8px 6px;
-    border-bottom: 1px solid #cccccc;
+    border-bottom: 1px solid {{ $line }};
     vertical-align: middle;
 }
 
 .document-table th {
-    color: #e8890c;
-    background: #f1f1f1;
+    color: {{ $accent }};
+    background: {{ $thBg }};
     text-align: left;
 }
 
 .document-table td {
-    color: #1a1a1a;
+    color: {{ $fg }};
 }
 
 .document-table th:nth-child(2),
@@ -147,7 +180,7 @@ h2 {
 
 .totals-table td {
     padding: 7px 6px;
-    border-bottom: 1px solid #cccccc;
+    border-bottom: 1px solid {{ $lineSoft }};
 }
 
 .totals-table td:first-child {
@@ -162,7 +195,7 @@ h2 {
 }
 
 .total {
-    color: #e8890c;
+    color: {{ $accent }};
     font-size: 13px;
     font-weight: bold;
 }
@@ -171,9 +204,9 @@ h2 {
 .bank-box {
     margin-top: 14px;
     padding: 10px;
-    border: 1px solid #cccccc;
-    background: #f7f7f7;
-    color: #1a1a1a;
+    border: 1px solid {{ $line }};
+    background: {{ $boxBg }};
+    color: {{ $fg }};
 }
 
 .small {
