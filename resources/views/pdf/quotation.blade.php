@@ -33,15 +33,13 @@
 
 @page {
     size: A4;
-    margin: 0;
+    margin: 20mm 18mm 40mm 18mm;
 }
 
 html,
 body {
     margin: 0;
     padding: 0;
-    width: 210mm;
-    height: 297mm;
 }
 
 body {
@@ -53,8 +51,8 @@ body {
 
 .letterhead {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: -20mm;
+    left: -18mm;
     width: 210mm;
     height: 297mm;
     z-index: 0;
@@ -68,7 +66,7 @@ body {
 .page {
     position: relative;
     z-index: 1;
-    padding: 20mm 18mm 40mm 18mm;
+    padding: 0;
 }
 
 .header-table {
@@ -184,6 +182,23 @@ h2 {
 
 .small {
     font-size: 9px;
+}
+
+
+.box,
+.bank-box,
+.totals-table,
+.document-table tr,
+h2 {
+    page-break-inside: avoid;
+}
+
+h2 {
+    page-break-after: avoid;
+}
+
+.document-table thead {
+    display: table-header-group;
 }
 
 </style>
