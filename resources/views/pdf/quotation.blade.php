@@ -52,6 +52,10 @@
         }
     }
 
+    $mt = $letterheadData ? 58 : 14;
+    $mb = $letterheadData ? 32 : 26;
+    $footerTop = 276 - $mt;
+
     $fg = $darkLetterhead ? '#ffffff' : '#1a1a1a';
     $muted = $darkLetterhead ? '#dddddd' : '#444444';
     $line = $darkLetterhead ? '#777777' : '#cccccc';
@@ -72,7 +76,7 @@
 
 @page {
     size: A4;
-    margin: 58mm 18mm 32mm 18mm;
+    margin: {{ $mt }}mm 18mm {{ $mb }}mm 18mm;
 }
 
 body {
@@ -85,7 +89,7 @@ body {
 
 .page-bg {
     position: fixed;
-    top: -58mm;
+    top: -{{ $mt }}mm;
     left: -18mm;
     width: 210mm;
     height: 297mm;
@@ -93,9 +97,25 @@ body {
     z-index: -1;
 }
 
+.footer {
+    position: fixed;
+    top: {{ $footerTop }}mm;
+    left: 0;
+    width: 174mm;
+    text-align: center;
+    font-size: 8px;
+    color: {{ $muted }};
+    border-top: 1px solid {{ $accent }};
+    padding-top: 6px;
+}
+
+.footer strong {
+    color: {{ $accent }};
+}
+
 .letterhead {
     position: fixed;
-    top: -58mm;
+    top: -{{ $mt }}mm;
     left: -18mm;
     width: 210mm;
     height: 297mm;
@@ -117,7 +137,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    margin: -8mm 0 12px 0;
+    margin: {{ $letterheadData ? '-8mm' : '0' }} 0 12px 0;
 }
 
 .header-table td {
@@ -254,6 +274,15 @@ h2 {
 </head>
 
 <body>
+
+@unless($letterheadData)
+<div class="footer">
+    <strong>{{ $company?->company_name ?: 'Crow.lk (Pvt) Ltd' }}</strong>
+    &nbsp;|&nbsp; Empowering businesses through seamless digital business transformation
+    <br>
+    077 437 9390 &nbsp;|&nbsp; hello@crow.lk &nbsp;|&nbsp; www.crow.lk
+</div>
+@endunless
 
 @unless($letterheadData)
 <div class="page-bg"></div>
