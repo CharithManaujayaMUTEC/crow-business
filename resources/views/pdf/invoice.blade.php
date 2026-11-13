@@ -16,8 +16,7 @@
 
     {
         $possiblePaths = [
-            public_path($company?->letterhead_path ?: 'images/crow-company-letterhead.png'),
-            public_path('images/crow-company-letterhead.png'),
+            public_path((string) $company?->letterhead_path),
             storage_path('app/public/' . ltrim(str_replace('storage/', '', (string) $company?->letterhead_path), '/')),
         ];
 
@@ -32,7 +31,7 @@
             }
         }
     }
-    $darkLetterhead = false;
+    $darkLetterhead = ! $letterheadData;
 
     if ($letterheadData && function_exists('imagecreatefromstring')) {
         $img = @imagecreatefromstring(base64_decode(substr($letterheadData, strpos($letterheadData, ',') + 1)));
@@ -54,7 +53,6 @@
             }
 
             $darkLetterhead = ($sum / $n) < 128;
-            imagedestroy($img);
         }
     }
 
@@ -78,7 +76,7 @@
 
 @page {
     size: A4;
-    margin: 50mm 18mm 38mm 18mm;
+    margin: 58mm 18mm 32mm 18mm;
 }
 
 body {
@@ -89,9 +87,19 @@ body {
     
 }
 
+.page-bg {
+    position: fixed;
+    top: -58mm;
+    left: -18mm;
+    width: 210mm;
+    height: 297mm;
+    background: #000000;
+    z-index: -1;
+}
+
 .letterhead {
     position: fixed;
-    top: -50mm;
+    top: -58mm;
     left: -18mm;
     width: 210mm;
     height: 297mm;
@@ -113,7 +121,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    margin: 0 0 12px 0;
+    margin: -8mm 0 12px 0;
 }
 
 .header-table td {
@@ -161,7 +169,7 @@ h2 {
 
 .document-table th,
 .document-table td {
-    padding: 8px 6px;
+    padding: 6px 6px;
     border-bottom: 1px solid {{ $line }};
     vertical-align: middle;
 }
@@ -250,6 +258,10 @@ h2 {
 
 <body>
 
+@unless($letterheadData)
+<div class="page-bg"></div>
+@endunless
+
 @if($letterheadData)
 <div class="letterhead">
     <img src="{{ $letterheadData }}" alt="Letterhead">
@@ -268,7 +280,9 @@ h2 {
         <tr>
 
             <td class="logo-cell">
-
+                @if(! $letterheadData && $logoData)
+                    <img src="{{ $logoData }}" class="company-logo" alt="Crow.lk">
+                @endif
             </td>
 
             <td class="right">
