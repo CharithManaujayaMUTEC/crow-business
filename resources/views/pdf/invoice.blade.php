@@ -47,13 +47,8 @@
     margin: 20mm 18mm 40mm 18mm;
 }
 
-html,
 body {
     margin: 0;
-    padding: 0;
-}
-
-body {
     font-family: DejaVu Sans, Arial, sans-serif;
     font-size: 10px;
     color: #ffffff;
