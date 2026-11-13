@@ -52,8 +52,8 @@
         }
     }
 
-    $mt = $letterheadData ? 58 : 14;
-    $mb = $letterheadData ? 32 : 26;
+    $mt = $letterheadData ? 46 : 14;
+    $mb = $letterheadData ? 33 : 26;
     $footerTop = 276 - $mt;
 
     $fg = $darkLetterhead ? '#ffffff' : '#1a1a1a';
@@ -137,7 +137,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    margin: {{ $letterheadData ? '-8mm' : '0' }} 0 12px 0;
+    margin: {{ $letterheadData ? '-30mm 0 8mm 0' : '0 0 12px 0' }};
 }
 
 .header-table td {

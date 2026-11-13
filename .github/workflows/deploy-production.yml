@@ -70,6 +70,8 @@ jobs:
             --exclude="vendor" \
             --exclude="node_modules" \
             --exclude="storage/logs/*" \
+            --exclude="storage/app/public/*" \
+            --exclude="storage/app/private/*" \
             --exclude="public/.htaccess" \
             ./ \
             production:${{ secrets.DEPLOY_PATH }}/
@@ -90,6 +92,8 @@ jobs:
             set -e
 
             cd "${{ secrets.DEPLOY_PATH }}"
+
+            mkdir -p storage/app/public storage/app/private
 
             sed -i "s#__DIR__.'/../storage#__DIR__.'/storage#g" index.php
             sed -i "s#__DIR__.'/../vendor#__DIR__.'/vendor#g" index.php
