@@ -55,6 +55,16 @@ body {
     background: #000000;
 }
 
+.page-bg {
+    position: fixed;
+    top: -20mm;
+    left: -18mm;
+    width: 210mm;
+    height: 297mm;
+    background: #000000;
+    z-index: -1;
+}
+
 .letterhead {
     position: fixed;
     top: -20mm;
@@ -215,6 +225,8 @@ h2 {
 </head>
 
 <body>
+
+<div class="page-bg"></div>
 
 @if($letterheadData)
 <div class="letterhead">
