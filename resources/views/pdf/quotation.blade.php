@@ -33,7 +33,7 @@
 
 @page {
     size: A4;
-    margin: 20mm 18mm 40mm 18mm;
+    margin: 20mm 18mm 25mm 18mm;
 }
 
 body {
