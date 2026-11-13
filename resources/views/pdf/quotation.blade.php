@@ -3,10 +3,11 @@
 
     $letterheadData = null;
 
-    if ($company?->letterhead_path) {
+    {
         $possiblePaths = [
-            public_path($company->letterhead_path),
-            storage_path('app/public/' . ltrim(str_replace('storage/', '', $company->letterhead_path), '/')),
+            public_path($company?->letterhead_path ?: 'images/crow-company-letterhead.png'),
+            public_path('images/crow-company-letterhead.png'),
+            storage_path('app/public/' . ltrim(str_replace('storage/', '', (string) $company?->letterhead_path), '/')),
         ];
 
         foreach ($possiblePaths as $path) {
@@ -33,30 +34,20 @@
 
 @page {
     size: A4;
-    margin: 20mm 18mm 25mm 18mm;
+    margin: 50mm 18mm 38mm 18mm;
 }
 
 body {
     margin: 0;
     font-family: DejaVu Sans, Arial, sans-serif;
     font-size: 10px;
-    color: #ffffff;
-    background: #000000;
-}
-
-.page-bg {
-    position: fixed;
-    top: -20mm;
-    left: -18mm;
-    width: 210mm;
-    height: 297mm;
-    background: #000000;
-    z-index: -1;
+    color: #1a1a1a;
+    
 }
 
 .letterhead {
     position: fixed;
-    top: -20mm;
+    top: -50mm;
     left: -18mm;
     width: 210mm;
     height: 297mm;
@@ -90,17 +81,17 @@ body {
 h1 {
     margin: 0 0 5px;
     font-size: 22px;
-    color: #ffffff;
+    color: #1a1a1a;
 }
 
 h2 {
     margin: 16px 0 7px;
     font-size: 13px;
-    color: #f5a623;
+    color: #e8890c;
 }
 
 .muted {
-    color: #dddddd;
+    color: #444444;
 }
 
 .right {
@@ -117,18 +108,18 @@ h2 {
 .document-table th,
 .document-table td {
     padding: 8px 6px;
-    border-bottom: 1px solid #777777;
+    border-bottom: 1px solid #cccccc;
     vertical-align: middle;
 }
 
 .document-table th {
-    color: #f5a623;
-    background: #151515;
+    color: #e8890c;
+    background: #f1f1f1;
     text-align: left;
 }
 
 .document-table td {
-    color: #ffffff;
+    color: #1a1a1a;
 }
 
 .document-table th:nth-child(2),
@@ -156,7 +147,7 @@ h2 {
 
 .totals-table td {
     padding: 7px 6px;
-    border-bottom: 1px solid #555555;
+    border-bottom: 1px solid #cccccc;
 }
 
 .totals-table td:first-child {
@@ -171,7 +162,7 @@ h2 {
 }
 
 .total {
-    color: #f5a623;
+    color: #e8890c;
     font-size: 13px;
     font-weight: bold;
 }
@@ -180,9 +171,9 @@ h2 {
 .bank-box {
     margin-top: 14px;
     padding: 10px;
-    border: 1px solid #666666;
-    background: #111111;
-    color: #ffffff;
+    border: 1px solid #cccccc;
+    background: #f7f7f7;
+    color: #1a1a1a;
 }
 
 .small {
@@ -210,8 +201,6 @@ h2 {
 </head>
 
 <body>
-
-<div class="page-bg"></div>
 
 @if($letterheadData)
 <div class="letterhead">
