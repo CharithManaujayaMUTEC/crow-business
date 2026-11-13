@@ -127,12 +127,12 @@ body {
 .header-table td {
     border: none;
     padding: 0;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 .logo-cell {
     text-align: left;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 .company-logo {

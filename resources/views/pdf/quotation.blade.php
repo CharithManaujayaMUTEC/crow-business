@@ -123,7 +123,7 @@ body {
 .header-table td {
     border: none;
     padding: 0;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 h1 {
