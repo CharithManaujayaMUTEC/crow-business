@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\Api\EmployeePortalController;
 use App\Http\Controllers\Api\SmsPackageController;
